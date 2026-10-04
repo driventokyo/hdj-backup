@@ -19,6 +19,8 @@ const DOCS = {
     bodyEn: "has completed the three-day VVIP service training of HIRE driver japan and passed the oral language examination, the in-car practical scenario and the written examination.",
     fields: [["認証番号", "No."], ["認証日", "Date of issue"], ["有効期限", "Valid until"], ["対応言語", "Languages"]],
     ring: "★ VVIP SERVICE ★ PROFESSIONAL CERTIFIED",
+    footJa: "本書は、HIRE driver japan のVVIPサービス研修をすべて修了し、所定の試験に合格した乗務員にのみ発行されます。認証番号は hiredriverjapan.com/verify で確認できます。",
+    footEn: "Issued only to drivers who complete the full HIRE driver japan VVIP service training and pass every required examination. Verify this certificate at hiredriverjapan.com/verify",
   },
   attestation: {
     file: "hdj-attestation-completion",
@@ -28,6 +30,8 @@ const DOCS = {
     bodyEn: "has attended and completed every day of the VVIP service training of HIRE driver japan.",
     fields: [["修了番号", "No."], ["修了日", "Date of completion"], ["研修", "Course"], ["対応言語", "Languages"]],
     ring: "★ VVIP TRAINING ★ COURSE COMPLETED",
+    footJa: "本書は、HIRE driver japan のVVIPサービス研修の全日程を受講し、修了した乗務員に発行されます。修了番号は hiredriverjapan.com/verify で確認できます。",
+    footEn: "Issued to drivers who attend and complete every day of the HIRE driver japan VVIP service training. Verify this attestation at hiredriverjapan.com/verify",
   },
 };
 
@@ -100,7 +104,7 @@ ${[[8.55, 8.55], [8.55, 288.45], [201.45, 8.55], [201.45, 288.45]].map(([t, l]) 
 <div class="ros">${rosette(doc.ring)}</div>
 <div class="sig">講師 Instructor<b>${TEACHER}</b></div>
 <div class="stamp">印<small>HDJ</small></div>
-<div class="foot">本書は HIRE driver japan が発行する民間の${doc.titleJa.replace(/ /g, "")}であり、国家資格・公的資格ではありません。真正性は hiredriverjapan.com/verify で番号を入力して確認できます。<br>Private document issued by HIRE driver japan. Not a national or government qualification. Verify the number at hiredriverjapan.com/verify</div>
+<div class="foot">${doc.footJa}<br>${doc.footEn}</div>
 </div></body></html>`;
 }
 
