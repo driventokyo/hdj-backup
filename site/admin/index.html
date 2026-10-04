@@ -52,9 +52,9 @@ function login(){$("#tabs").innerHTML="";$("#who").textContent="";
   app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
 
-const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
+const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
 const TABS_TEACHER=[["courses","Le mie sessioni"]];
-const TABS_OPERATOR=[["refs","案件ボード"],["stmts","請求書"],["certs","乗務員の認証"]];
+const TABS_OPERATOR=[["refs","案件ボード"],["stmts","請求書"],["acad","研修の進捗"],["certs","乗務員の認証"]];
 async function start(){
   const tabs=ME.role==="admin"?TABS_ADMIN:ME.role==="teacher"?TABS_TEACHER:TABS_OPERATOR;
   $("#ptitle").textContent=ME.role==="operator"?"提携事業者さま専用画面":"pannello";
@@ -64,7 +64,7 @@ async function start(){
   show(tabs[0][0]);counts();setInterval(counts,60000);
 }
 async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}const o=$("#c-refs");if(o&&ME.role==="operator"){o.hidden=!c.open_jobs;o.textContent=c.open_jobs}document.title=(ME.role==="operator"?(c.open_jobs?`(${c.open_jobs}) `:"")+"案件ボード":(n?`(${n}) `:"")+"Pannello")+" · HIRE driver japan"}catch(_){}}
-function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
+function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,acad,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
 
 // ---- Richieste: pipeline
 let leadKind="service";
@@ -228,6 +228,75 @@ async function stmts(){
   const g=$("#sgen");if(g)g.onclick=async()=>{const j=await api("/statements/generate",{period:$("#sp").value});toast(j.made.length?`Creati: ${j.made.join(", ")}`:"Niente da fatturare per quel mese"+(j.skipped.length?` (gia' esistenti: ${j.skipped.join(", ")})`:""));stmts()};
   app.querySelectorAll("[data-inv]").forEach(b=>b.onclick=()=>openInvoice(b.dataset.inv));
   app.querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{if(b.dataset.st==="void"&&!confirm("Annullare l'estratto? Le segnalazioni tornano modificabili."))return;await api("/statements/"+b.dataset.id,{status:b.dataset.st});toast("Aggiornato");stmts()});
+}
+
+// ---- HDJ Academy
+let acadTab="lessons";
+async function acad(){
+  if(ME.role==="operator")return acadLearnersOp();
+  app.innerHTML=`<div class="sub">${[["lessons","Lezioni"],["questions","Domande d'esame"],["learners","Allievi"]].map(([k,t])=>`<button data-k="${k}" class="${k===acadTab?"on":""}">${t}</button>`).join("")} <a href="/academy/" target="_blank" style="margin-left:auto;align-self:center">Apri l'Academy ↗</a></div><div id="acb"></div>`;
+  app.querySelector(".sub").onclick=e=>{const b=e.target.closest("button");if(b){acadTab=b.dataset.k;acad()}};
+  ({lessons:acadLessons,questions:acadQuestions,learners:acadLearners})[acadTab]();
+}
+async function acadLessons(){
+  const rows=(await api("/academy/lessons")).rows;const box=$("#acb");
+  const mb=b=>b?(b/1048576).toFixed(0)+" MB":"";
+  box.innerHTML=`<p style="color:#5b6875">Carica il video (MP4 dal telefono va bene), poi "Pubblica". Gli allievi vedono solo le lezioni pubblicate; l'esame si sblocca quando hanno visto almeno il 90% di ognuna.</p>
+  <table><tr><th>N.</th><th>Giorno</th><th>Titolo</th><th>Video</th><th>Stato</th><th>Completate</th><th></th></tr>${rows.map(l=>`<tr data-id="${l.id}"><td>${l.position}</td><td>${l.day}</td><td><b>${esc(l.title_ja)}</b><br><small>${esc(l.title_en||"")}</small></td><td>${l.video_key?`✓ ${mb(l.video_bytes)}${l.duration_s?" · "+Math.round(l.duration_s/60)+" min":""}<br><a href="${l.preview_url}" target="_blank">anteprima</a>`:'<span class="tag revoked">manca</span>'}<div class="up" style="font-size:12px;color:#5b6875"></div></td><td><span class="tag ${l.status==="published"?"active":""}">${l.status==="published"?"pubblicata":"bozza"}</span></td><td>${l.completions}</td>
+  <td><label class="b s" style="display:inline-block;cursor:pointer">Carica video<input type="file" accept="video/mp4,video/quicktime,video/webm" data-up hidden></label> <button class="b s" data-ed>Testi</button> ${l.status==="published"?`<button class="b s" data-st="draft">Ritira</button>`:`<button class="b" data-st="published">Pubblica</button>`}</td></tr>`).join("")}</table>
+  <div class="panel"><h3>Nuova lezione</h3><div class="row"><label>Giorno<select id="nld"><option value="1">1 · standard VVIP</option><option value="2">2 · lingua</option></select></label><label>Titolo giapponese<input id="nlj"></label><label>Titolo inglese<input id="nle"></label><button class="b" id="nls">Aggiungi</button></div></div>`;
+  $("#nls").onclick=async()=>{await api("/academy/lessons",{day:$("#nld").value,title_ja:$("#nlj").value,title_en:$("#nle").value});toast("Lezione aggiunta");acadLessons()};
+  box.querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{await api("/academy/lessons/"+b.closest("tr").dataset.id,{status:b.dataset.st});toast("Aggiornato");acadLessons()});
+  box.querySelectorAll("[data-ed]").forEach(b=>b.onclick=()=>lessonDlg(rows.find(r=>r.id===b.closest("tr").dataset.id)));
+  box.querySelectorAll("[data-up]").forEach(inp=>inp.onchange=()=>{if(inp.files[0])uploadVideo(inp.closest("tr").dataset.id,inp.files[0],inp.closest("tr").querySelector(".up"))});
+}
+function lessonDlg(l){
+  $("#dlgin").innerHTML=`<h3>${esc(l.id)} · testi</h3><div class="row"><label>Titolo JA<input id="tj" value="${esc(l.title_ja)}"></label><label>Titolo EN<input id="te" value="${esc(l.title_en||"")}"></label><label>Posizione<input id="tp" type="number" value="${l.position}"></label></div>
+  <div class="row"><label>Riassunto JA<input id="sj" value="${esc(l.summary_ja||"")}"></label><label>Riassunto EN<input id="se" value="${esc(l.summary_en||"")}"></label></div>
+  <label style="font-size:12px;color:#5b6875">Scheda di studio JA (una riga che inizia con "- " diventa un punto elenco)<textarea id="nj" rows="6">${esc(l.notes_ja||"")}</textarea></label>
+  <label style="font-size:12px;color:#5b6875">Scheda di studio EN<textarea id="ne" rows="6">${esc(l.notes_en||"")}</textarea></label>
+  <p class="row"><button class="b" id="tsv">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${l.video_key?`<button class="b r" id="trm">Togli il video</button>`:""}</p>`;dlg.showModal();
+  $("#tsv").onclick=async()=>{await api("/academy/lessons/"+l.id,{title_ja:$("#tj").value,title_en:$("#te").value,position:$("#tp").value,summary_ja:$("#sj").value,summary_en:$("#se").value,notes_ja:$("#nj").value,notes_en:$("#ne").value});dlg.close();toast("Salvato");acadLessons()};
+  const rm=$("#trm");if(rm)rm.onclick=async()=>{if(!confirm("Togliere il video da questa lezione?"))return;await api("/academy/lessons/"+l.id,{remove_video:true,status:"draft"});dlg.close();acadLessons()};
+}
+async function uploadVideo(id,file,el){
+  const CH=10*1024*1024;
+  const dur=await new Promise(r=>{const v=document.createElement("video");v.preload="metadata";v.onloadedmetadata=()=>{r(Math.round(v.duration)||null);URL.revokeObjectURL(v.src)};v.onerror=()=>r(null);v.src=URL.createObjectURL(file)});
+  const st=await api("/academy/upload/start",{lesson_id:id,type:file.type});const parts=[];const n=Math.ceil(file.size/CH);
+  try{for(let i=0;i<n;i++){el.textContent=`Caricamento ${Math.round(i/n*100)}% (${i}/${n})… non chiudere la pagina`;
+      let tries=0,res;while(true){try{res=await fetch(`/api/admin/academy/upload/part?key=${encodeURIComponent(st.key)}&upload_id=${encodeURIComponent(st.upload_id)}&part=${i+1}`,{method:"PUT",headers:{"x-panel-token":TOKEN},body:file.slice(i*CH,(i+1)*CH)});if(res.ok)break}catch(_){}if(++tries>=3)throw new Error("part "+(i+1))}
+      parts.push((await res.json()).part)}
+    await api("/academy/upload/complete",{key:st.key,upload_id:st.upload_id,parts,duration_s:dur});el.textContent="Caricato ✓";toast("Video caricato");acadLessons()}
+  catch(e){el.textContent="Errore nel caricamento: riprova";api("/academy/upload/abort",{key:st.key,upload_id:st.upload_id}).catch(()=>{})}
+}
+async function acadQuestions(){
+  const rows=(await api("/academy/questions")).rows;const box=$("#acb");
+  box.innerHTML=`<p style="color:#5b6875">L'esame pesca 20 domande a caso tra quelle attive. Soglia 70/100, 30 minuti.</p><p><button class="b" id="qn">Nuova domanda</button></p>
+  <table><tr><th>N.</th><th>Domanda</th><th>Risposte (✓ = giusta)</th><th>Stato</th><th></th></tr>${rows.map(q=>{const o=JSON.parse(q.options_ja);return `<tr data-id="${q.id}"><td>${q.position}</td><td>${esc(q.q_ja)}<br><small>${esc(q.q_en||"")}</small></td><td><small>${o.map((x,i)=>(i===q.correct?"✓ ":"· ")+esc(x)).join("<br>")}</small></td><td><span class="tag ${q.status==="active"?"active":""}">${q.status==="active"?"attiva":"disattivata"}</span></td><td><button class="b s" data-q>Modifica</button></td></tr>`}).join("")}</table>`;
+  $("#qn").onclick=()=>qDlg(null);box.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>qDlg(rows.find(r=>r.id===b.closest("tr").dataset.id)));
+}
+function qDlg(q){const oj=q?JSON.parse(q.options_ja):["","","",""],oe=q&&q.options_en?JSON.parse(q.options_en):["","","",""];
+  $("#dlgin").innerHTML=`<h3>${q?esc(q.id):"Nuova domanda"}</h3><label style="font-size:12px">Domanda JA<textarea id="qj" rows="2">${esc(q?q.q_ja:"")}</textarea></label><label style="font-size:12px">Domanda EN<textarea id="qe" rows="2">${esc(q?q.q_en||"":"")}</textarea></label>
+  <table><tr><th>Giusta</th><th>Risposta JA</th><th>Risposta EN</th></tr>${[0,1,2,3].map(i=>`<tr><td><input type="radio" name="qc" value="${i}"${q&&q.correct===i?" checked":""}></td><td><input data-oj value="${esc(oj[i]||"")}"></td><td><input data-oe value="${esc(oe[i]||"")}"></td></tr>`).join("")}</table>
+  <div class="row"><label>Spiegazione JA<input id="xj" value="${esc(q?q.explain_ja||"":"")}"></label><label>Spiegazione EN<input id="xe" value="${esc(q?q.explain_en||"":"")}"></label><label>Stato<select id="qs"><option value="active">attiva</option><option value="inactive"${q&&q.status==="inactive"?" selected":""}>disattivata</option></select></label></div>
+  <p class="row"><button class="b" id="qsv">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button></p>`;dlg.showModal();
+  $("#qsv").onclick=async()=>{const c=document.querySelector('input[name="qc"]:checked');if(!c){toast("Segna la risposta giusta");return}
+    const b={q_ja:$("#qj").value,q_en:$("#qe").value,options_ja:[...document.querySelectorAll("[data-oj]")].map(i=>i.value),options_en:[...document.querySelectorAll("[data-oe]")].map(i=>i.value),correct:Number(c.value),explain_ja:$("#xj").value,explain_en:$("#xe").value,status:$("#qs").value};
+    await api(q?"/academy/questions/"+q.id:"/academy/questions",b);dlg.close();toast("Salvata");acadQuestions()};
+}
+async function acadLearners(){
+  const j=await api("/academy/learners");const box=$("#acb");
+  box.innerHTML=`<p style="color:#5b6875">Gli autisti si creano in "Anagrafiche". Qui dai l'accesso: il pannello mostra il link personale una volta sola, da mandare via LINE, WhatsApp o email. Ogni autista ha ${j.attempts_included} tentativi d'esame inclusi; quelli in piu' li concedi tu (ripetizione dopo i 60 giorni a pagamento).</p>
+  <table><tr><th>Autista</th><th>Azienda</th><th>Lezioni</th><th>Ultima attivita'</th><th>Esame</th><th></th></tr>${j.rows.map(d=>`<tr data-id="${d.id}"><td>${esc(d.full_name)}<br><small>${esc(d.name_latin||"")}</small></td><td>${esc(d.operator_name||"")}</td><td>${d.academy_access?`${d.lessons_done}/${j.lessons_published}`:"—"}</td><td>${d10(d.last_activity)}</td><td>${d.attempts?`${d.best_score}/100 ${d.passed?'<span class="tag active">superato</span>':'<span class="tag revoked">non superato</span>'}<br><small>tentativi ${d.attempts}/${j.attempts_included+d.academy_exam_extra}</small>`:"—"}</td>
+  <td>${d.academy_access?`<button class="b s" data-link>Nuovo link</button> <button class="b s" data-extra>+1 tentativo</button> <button class="b r" data-rev>Togli accesso</button>`:`<button class="b" data-link>Dai accesso</button>`}</td></tr>`).join("")||'<tr><td colspan="6">Nessun autista in anagrafica.</td></tr>'}</table>`;
+  box.querySelectorAll("[data-link]").forEach(b=>b.onclick=async()=>{const r=await api("/academy/access",{driver_id:b.closest("tr").dataset.id});$("#dlgin").innerHTML=`<h3>Link personale</h3><p>${esc(r.warning)}</p><pre>${esc(r.link)}</pre><p class="row"><button class="b" id="cpl">Copia</button><button class="b s" onclick="dlg.close()">Fatto</button></p>`;dlg.showModal();$("#cpl").onclick=()=>{navigator.clipboard.writeText(r.link);toast("Link copiato")};acadLearners()});
+  box.querySelectorAll("[data-extra]").forEach(b=>b.onclick=async()=>{await api("/academy/extra-attempt",{driver_id:b.closest("tr").dataset.id});toast("Tentativo aggiunto");acadLearners()});
+  box.querySelectorAll("[data-rev]").forEach(b=>b.onclick=async()=>{if(!confirm("Togliere l'accesso all'Academy? Il link smette di funzionare."))return;await api("/academy/access",{driver_id:b.closest("tr").dataset.id,revoke:true});acadLearners()});
+}
+async function acadLearnersOp(){
+  const j=await api("/academy/learners");
+  app.innerHTML=`<p style="color:#5b6875">HDJ Academy（オンライン研修）での御社乗務員の進捗です。動画をすべて見終えると筆記試験を受けられます。3日目の実地練習と実地試験は講師が御社に伺って行います。</p>
+  <table><tr><th>乗務員</th><th>動画</th><th>最終利用日</th><th>筆記試験</th></tr>${j.rows.map(d=>`<tr><td>${esc(d.full_name)}</td><td>${d.lessons_done}/${j.lessons_published}</td><td>${d10(d.last_activity)}</td><td>${d.attempts?`${d.best_score}点 ${d.passed?'<span class="tag active">合格</span>':'<span class="tag revoked">不合格</span>'}`:"未受験"}</td></tr>`).join("")||'<tr><td colspan="4">オンライン研修を受講中の乗務員はいません。</td></tr>'}</table>`;
 }
 
 // ---- Export

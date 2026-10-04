@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>HDJ Academy · HIRE driver japan</title>
+<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#14110E">
+<link rel="stylesheet" href="/assets/site.css">
+<style>
+.ac{max-width:980px;margin:0 auto;padding:24px 16px 80px}
+.ac h1{font-size:clamp(26px,4vw,36px);margin:8px 0 4px}.ac .muted{color:var(--mut,#A39A8A)}
+.lang{margin-left:auto;display:flex;gap:6px}.lang button{white-space:nowrap;font-size:13px;background:none;border:1px solid #3a3127;color:#cfc6b6;border-radius:6px;padding:4px 9px;cursor:pointer;font:inherit}.lang button.on{border-color:#C7A36A;color:#C7A36A}
+.bar2{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid #2b241d;max-width:980px;margin:0 auto}
+.day{margin:28px 0 10px;font-family:"Cormorant Garamond",serif;font-size:22px;color:#C7A36A}
+.ls{display:grid;gap:10px}.li{display:flex;gap:14px;align-items:center;border:1px solid #2b241d;background:#1b1713;border-radius:10px;padding:12px 14px;cursor:pointer;color:inherit;text-decoration:none}
+.li:hover{border-color:#C7A36A}.li .n{width:34px;height:34px;border-radius:50%;border:1px solid #C7A36A;display:flex;align-items:center;justify-content:center;color:#C7A36A;flex:none}
+.li .t{flex:1}.li small{color:#A39A8A}.pb{height:4px;background:#2b241d;border-radius:4px;margin-top:6px;overflow:hidden}.pb i{display:block;height:100%;background:#C7A36A}
+.done .n{background:#C7A36A;color:#14110E}
+.card{border:1px solid #3a3127;background:#1b1713;border-radius:12px;padding:18px;margin:18px 0}
+.btn2{display:inline-block;background:#C7A36A;color:#14110E;border:0;border-radius:8px;padding:11px 18px;font:inherit;font-weight:600;cursor:pointer;text-decoration:none}.btn2[disabled]{opacity:.4;cursor:not-allowed}.btn2.g{background:none;color:#C7A36A;border:1px solid #C7A36A}
+video{width:100%;border-radius:10px;background:#000;margin:12px 0}
+.notes{line-height:1.8;white-space:normal}.notes li{margin:4px 0}
+.q{border-top:1px solid #2b241d;padding:16px 0}.q p{margin:0 0 8px;font-weight:600}.q label{display:flex;gap:10px;align-items:flex-start;padding:7px 10px;border-radius:8px;cursor:pointer}.q label:hover{background:#221d18}.q input{margin-top:5px}
+.timer{position:sticky;top:0;background:#14110E;padding:10px 0;border-bottom:1px solid #2b241d;z-index:2;display:flex;justify-content:space-between}
+.ok{color:#8fd19e}.ko{color:#e88b8b}
+</style>
+</head>
+<body>
+<div class="bar2"><a class="logo" href="/ja/"><img class="mark" src="/assets/hdj-mark.svg" width="34" height="34" alt=""><span class="lt"><span class="wm"><b>HIRE</b> driver japan</span><small>Academy</small></span></a><span class="lang"><button data-l="ja">日本語</button><button data-l="en">English</button></span></div>
+<main class="ac" id="app"><p class="muted">…</p></main>
+<script>
+(function(){
+const app=document.getElementById("app");
+let LANG="ja",KEY=null,STATE=null;
+try{LANG=localStorage.getItem("hdj_ac_lang")||"ja"}catch(_){}
+document.documentElement.lang=LANG;
+try{const h=new URLSearchParams(location.hash.slice(1));if(h.get("k")){localStorage.setItem("hdj_ac_key",h.get("k"));history.replaceState(null,"",location.pathname)}KEY=localStorage.getItem("hdj_ac_key")}catch(_){const h=new URLSearchParams(location.hash.slice(1));KEY=h.get("k")}
+const T={ja:{hello:"ようこそ",intro:"VVIPサービス研修の1日目と2日目をオンラインで学べます。すべての動画を見終えると、筆記試験を受けられます。3日目の実地練習と実地試験は、講師が御社に伺って行います。",d1:"1日目　VVIPの基準",d2:"2日目　接客の外国語",min:"分",exam:"筆記試験",examTxt:n=>`${n.questions}問・${n.minutes}分・${n.pass}点以上で合格。受験は${n.included_attempts}回まで（2回目は不合格の場合の再受験）。`,locked:(d,p)=>`すべての動画を見終えると受験できます（${d}/${p}）。`,start:"試験を始める",resume:"試験を再開する",passed:"合格しました。おめでとうございます。",noatt:"受験回数の上限に達しました。担当者にご連絡ください。",back:"← 一覧へ",next:"次へ →",notes:"学習シート",nov:"動画は準備中です。",watched:"視聴済み",submit:"答えを送信する",confirm:"答えを送信しますか？送信後は変更できません。",left:"残り時間",score:"得点",pass:"合格",fail:"不合格",retry:"もう一度受験できます。",nokey:"アクセスには、担当者からお送りした個人用リンクが必要です。",exp:"このリンクは無効です。担当者に新しいリンクをご依頼ください。",att:"これまでの受験"},
+en:{hello:"Welcome",intro:"Study days 1 and 2 of the VVIP service training online. When you have watched every video, you can take the written exam. The in-car practice and practical exam on day 3 take place at your company with the trainer.",d1:"Day 1 · The VVIP standard",d2:"Day 2 · Service language",min:"min",exam:"Written exam",examTxt:n=>`${n.questions} questions · ${n.minutes} minutes · pass mark ${n.pass}. Up to ${n.included_attempts} attempts (the second is a retake if needed).`,locked:(d,p)=>`Watch every video to unlock the exam (${d}/${p}).`,start:"Start the exam",resume:"Resume the exam",passed:"You passed. Congratulations.",noatt:"You have used all your attempts. Please contact us.",back:"← All lessons",next:"Next →",notes:"Study sheet",nov:"Video coming soon.",watched:"watched",submit:"Submit answers",confirm:"Submit your answers? You cannot change them afterwards.",left:"Time left",score:"Score",pass:"Passed",fail:"Not passed",retry:"You can take the exam again.",nokey:"You need the personal link we sent you to access the Academy.",exp:"This link is no longer valid. Please ask us for a new one.",att:"Your attempts"}};
+const t=k=>T[LANG][k];
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tt=(o,k)=>LANG==="en"&&o[k+"_en"]?o[k+"_en"]:o[k+"_ja"];
+const md=s=>{if(!s)return"";const L=esc(s).split(/\n/);let h="",ul=false;for(const x of L){if(/^\s*[-・]\s+/.test(x)){if(!ul){h+="<ul>";ul=true}h+="<li>"+x.replace(/^\s*[-・]\s+/,"")+"</li>"}else{if(ul){h+="</ul>";ul=false}h+=x.trim()?"<p>"+x+"</p>":""}}return h+(ul?"</ul>":"")};
+async function api(path,body){const r=await fetch("/api/academy"+path,{method:body?"POST":"GET",headers:{"x-academy-key":KEY||"","content-type":"application/json"},body:body?JSON.stringify(body):undefined});const j=await r.json().catch(()=>({ok:false}));if(r.status===401){app.innerHTML=`<h1>HDJ Academy</h1><p class="muted">${t(KEY?"exp":"nokey")}</p>`;throw new Error("401")}return j}
+document.querySelectorAll(".lang button").forEach(b=>{b.classList.toggle("on",b.dataset.l===LANG);b.onclick=()=>{LANG=b.dataset.l;try{localStorage.setItem("hdj_ac_lang",LANG)}catch(_){}document.documentElement.lang=LANG;document.querySelectorAll(".lang button").forEach(x=>x.classList.toggle("on",x.dataset.l===LANG));route()}});
+
+async function home(){
+  const j=await api("/me");STATE=j;const e=j.exam,r=e.rules;
+  const list=day=>j.lessons.filter(l=>l.day===day).map((l,i)=>`<a class="li${l.completed_at?" done":""}" href="#l=${l.id}"><span class="n">${l.completed_at?"✓":i+1}</span><span class="t">${esc(tt(l,"title"))}<br><small>${l.duration_s?Math.max(1,Math.round(l.duration_s/60))+" "+t("min")+" · ":""}${l.pct}% ${t("watched")}</small><span class="pb"><i style="width:${l.pct}%"></i></span></span></a>`).join("");
+  const att=e.attempts.filter(a=>a.submitted_at).map(a=>`<li>${a.submitted_at.slice(0,10)} · ${t("score")} ${a.score} · <span class="${a.passed?"ok":"ko"}">${a.passed?t("pass"):t("fail")}</span></li>`).join("");
+  let action;
+  if(e.passed)action=`<p class="ok">${t("passed")}</p>`;
+  else if(!e.unlocked)action=`<p class="muted">${t("locked")(e.lessons_done,e.lessons_published)}</p><button class="btn2" disabled>${t("start")}</button>`;
+  else if(e.open_attempt)action=`<button class="btn2" id="go">${t("resume")}</button>`;
+  else if(e.attempts_used>=e.attempts_allowed)action=`<p class="ko">${t("noatt")}</p>`;
+  else action=`${e.attempts_used?`<p class="muted">${t("retry")}</p>`:""}<button class="btn2" id="go">${t("start")}</button>`;
+  app.innerHTML=`<p class="muted">${t("hello")}</p><h1>${esc(LANG==="en"&&j.driver.name_latin?j.driver.name_latin:j.driver.name)}</h1><p class="muted">${t("intro")}</p>
+  <div class="day">${t("d1")}</div><div class="ls">${list(1)||`<p class="muted">${t("nov")}</p>`}</div>
+  <div class="day">${t("d2")}</div><div class="ls">${list(2)||`<p class="muted">${t("nov")}</p>`}</div>
+  <div class="card"><h2 style="margin-top:0">${t("exam")}</h2><p class="muted">${t("examTxt")(r)}</p>${action}${att?`<p class="muted" style="margin-top:14px">${t("att")}</p><ul>${att}</ul>`:""}</div>`;
+  const g=document.getElementById("go");if(g)g.onclick=()=>{location.hash="exam"};
+}
+
+let saveT=0;
+async function lesson(id){
+  const j=await api("/lessons/"+id);if(!j.ok){location.hash="";return}
+  const l=j.lesson;let maxPos=j.progress.max_pos_s||0;
+  if(!STATE)STATE=await api("/me");
+  const all=STATE.lessons,i=all.findIndex(x=>x.id===id),nx=all[i+1];
+  app.innerHTML=`<a href="#" class="muted">${t("back")}</a><p class="muted" style="margin:14px 0 0">${l.day===1?t("d1"):t("d2")}</p><h1>${esc(tt(l,"title"))}</h1>${tt(l,"summary")?`<p class="muted">${esc(tt(l,"summary"))}</p>`:""}
+  ${l.video_url?`<video id="v" controls playsinline preload="metadata" controlslist="nodownload noplaybackrate" disablepictureinpicture src="${l.video_url}"></video>`:`<div class="card muted">${t("nov")}</div>`}
+  ${tt(l,"notes")?`<div class="card"><h2 style="margin-top:0">${t("notes")}</h2><div class="notes">${md(tt(l,"notes"))}</div></div>`:""}
+  <p>${nx?`<a class="btn2 g" href="#l=${nx.id}">${t("next")}</a>`:`<a class="btn2 g" href="#">${t("back")}</a>`}</p>`;
+  const v=document.getElementById("v");if(!v)return;
+  v.oncontextmenu=e=>e.preventDefault();
+  v.addEventListener("loadedmetadata",()=>{if(maxPos>5&&maxPos<v.duration-5)v.currentTime=maxPos});
+  v.addEventListener("seeking",()=>{if(v.currentTime>maxPos+3)v.currentTime=maxPos}); // si puo' tornare indietro, non saltare avanti
+  const send=()=>{if(!v.duration)return;maxPos=Math.max(maxPos,v.currentTime);api("/progress",{lesson_id:id,pos:v.currentTime,duration:v.duration}).then(r=>{if(r&&r.completed&&STATE){const x=STATE.lessons.find(y=>y.id===id);if(x)x.completed_at=x.completed_at||"1"}}).catch(()=>{})};
+  v.addEventListener("timeupdate",()=>{if(v.currentTime>maxPos&&v.currentTime<=maxPos+3)maxPos=v.currentTime;if(Date.now()-saveT>15000){saveT=Date.now();send()}});
+  v.addEventListener("pause",send);v.addEventListener("ended",send);
+}
+
+let TIMER=null;
+async function exam(){
+  const j=await api("/exam/start",{});if(!j.ok){location.hash="";return}
+  const dl=Date.parse(j.attempt.deadline_at);let answers={};
+  try{answers=JSON.parse(sessionStorage.getItem("hdj_ex_"+j.attempt.id)||"{}")}catch(_){}
+  app.innerHTML=`<div class="timer"><b>${t("exam")}</b><span>${t("left")} <b id="tm"></b></span></div>`+j.questions.map((q,n)=>{const o=LANG==="en"&&q.options_en?q.options_en:q.options_ja;return `<div class="q"><p>${n+1}. ${esc(LANG==="en"&&q.q_en?q.q_en:q.q_ja)}</p>${o.map((x,k)=>`<label><input type="radio" name="${q.id}" value="${k}"${answers[q.id]==k?" checked":""}> <span>${esc(x)}</span></label>`).join("")}</div>`}).join("")+`<p><button class="btn2" id="sub">${t("submit")}</button></p>`;
+  app.addEventListener("change",e=>{if(e.target.name){answers[e.target.name]=Number(e.target.value);try{sessionStorage.setItem("hdj_ex_"+j.attempt.id,JSON.stringify(answers))}catch(_){}}});
+  const submit=async()=>{clearInterval(TIMER);const r=await api("/exam/submit",{attempt_id:j.attempt.id,answers});STATE=null;
+    app.innerHTML=`<h1>${t("exam")}</h1><div class="card"><p style="font-size:22px">${t("score")}: <b>${r.score??"-"}</b> / 100</p><p class="${r.passed?"ok":"ko"}">${r.passed?t("passed"):t("fail")}</p><a class="btn2 g" href="#">${t("back")}</a></div>`;window.scrollTo(0,0)};
+  document.getElementById("sub").onclick=()=>{if(confirm(t("confirm")))submit()};
+  const tick=()=>{const s=Math.max(0,Math.round((dl-Date.now())/1000));document.getElementById("tm").textContent=`${Math.floor(s/60)}:${String(s%60).padStart(2,"0")}`;if(s<=0)submit()};tick();TIMER=setInterval(tick,1000);
+}
+
+function route(){clearInterval(TIMER);const h=location.hash.slice(1);if(!KEY){app.innerHTML=`<h1>HDJ Academy</h1><p class="muted">${t("nokey")}</p>`;return}
+  if(h.startsWith("l="))lesson(h.slice(2)).catch(()=>{});else if(h==="exam")exam().catch(()=>{});else home().catch(()=>{});window.scrollTo(0,0)}
+window.addEventListener("hashchange",route);route();
+})();
+</script>
+</body>
+</html>
