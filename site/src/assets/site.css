@@ -115,3 +115,8 @@ h1,h2,h3,.sub{text-wrap:balance}
 
 .lt .wm{font:300 15px/1 "Jost",var(--sans);letter-spacing:.1em;color:var(--ivory);white-space:nowrap}.lt .wm b{font:600 21px/1 "Cormorant Garamond",serif;letter-spacing:.1em;color:var(--gold);margin-right:2px}
 .fbrand{font:300 15px/1 "Jost",var(--sans);letter-spacing:.1em;color:var(--ivory)}.fbrand b{font:600 22px/1 "Cormorant Garamond",serif;color:var(--gold);letter-spacing:.1em}
+
+/* Home: foto del driver intera, prima cosa che si vede sul telefono */
+.hero.pf .wrap{grid-template-columns:.9fr 1.1fr}
+.himg figcaption{color:var(--mut);font-size:12px;line-height:1.5;padding:8px 2px 0}
+@media (max-width:860px){.hero.pf{padding-top:20px}.hero.pf .himg{order:-1}.hero.pf .wrap{grid-template-columns:1fr}}

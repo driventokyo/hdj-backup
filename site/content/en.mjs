@@ -34,7 +34,7 @@ export default {
       title: "Private Multilingual Driver for Your Car in Tokyo | {{BRAND}}",
       meta: "A driver with Japan's Class 2 commercial licence who speaks Japanese, English, Italian, French and Spanish drives your company or executive car by the hour. For visiting executives, VIP guests and days your own driver is away.",
       h1: "A professional driver for your own car, in five languages.",
-      hero: { kicker: "Private and executive driver by the hour, Tokyo", sub: "Your driver is {{TEACHER}}, our founder, in person. He holds a Japanese Class 2 licence and has looked after VIP clients and overseas delegations in five languages.", ctas: [{ label: "Ask for rates and availability", href: "#form" }, { label: "See the plans", href: "#plans" }] },
+      hero: { kicker: "Private and executive driver by the hour, Tokyo", sub: "Your driver is {{TEACHER}}, our founder, in person. He holds a Japanese Class 2 licence and has looked after VIP clients and overseas delegations in five languages.", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "Your driver, {{TEACHER}}", cap: "Illustrative photo. On every booking he drives your own vehicle." }, ctas: [{ label: "Ask for rates and availability", href: "#form" }, { label: "See the plans", href: "#plans" }] },
       blocks: [
         { type: "cards", h2: "When companies call", cols: 2, items: [
           { h3: "Executives visiting from headquarters", p: "From the airport pickup to dinners and site visits, driven by someone who speaks your guests' language." },

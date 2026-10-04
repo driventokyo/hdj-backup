@@ -34,7 +34,7 @@ export default {
       title: "东京专职司机按小时服务｜五种语言，二种驾照，驾驶您的车｜{{BRAND}}",
       meta: "持有日本二种驾照、能用日语、英语、意大利语、法语和西班牙语接待客人的司机，按小时驾驶贵公司的车辆。适用于海外高管访日、贵宾接送和专职司机休假。这是驾驶业务受托，不是旅客运输。",
       h1: "贵公司的车，由会五种语言的专业司机来开。",
-      hero: { kicker: "在东京请专职司机，按小时计费", sub: "为您驾驶的是本公司代表{{TEACHER}}本人。他持有二种驾照，长期用五种语言负责贵宾接送和海外代表团接待。", ctas: [{ label: "咨询价格与档期", href: "#form" }, { label: "查看方案", href: "#plans" }] },
+      hero: { kicker: "在东京请专职司机，按小时计费", sub: "为您驾驶的是本公司代表{{TEACHER}}本人。他持有二种驾照，长期用五种语言负责贵宾接送和海外代表团接待。", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "司机 {{TEACHER}}", cap: "图片仅供参考。服务时驾驶的是贵公司的车辆。" }, ctas: [{ label: "咨询价格与档期", href: "#form" }, { label: "查看方案", href: "#plans" }] },
       blocks: [
         { type: "cards", h2: "常见的使用场景", cols: 2, items: [
           { h3: "总部高管来日本", p: "从机场接机到商务宴请、工厂参观，用客人的语言边交流边驾驶。" },
