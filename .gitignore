@@ -1,0 +1,10 @@
+# segreti e file locali
+**/.dev.vars
+**/ADMIN-TOKEN-pannello.txt
+**/.wrangler/
+**/node_modules/
+site/dist/
+site/dev.log
+seo/collect.out
+seo/*.out
+.DS_Store

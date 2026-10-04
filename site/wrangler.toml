@@ -1,0 +1,32 @@
+# Hire Driver Japan: un solo Worker serve sito statico (dist/), API, /verify e pannello.
+# Progetto e database SEPARATI da DRIVEN Tokyo.
+name = "hdj-site"
+main = "worker/worker.js"
+compatibility_date = "2025-09-01"
+workers_dev = false
+
+routes = [
+  { pattern = "hiredriverjapan.com", custom_domain = true },
+  { pattern = "www.hiredriverjapan.com", custom_domain = true }
+]
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hdj-data"
+database_id = "8f355aee-c240-4828-9240-b9f9644856c7"
+
+[vars]
+SITE_URL = "https://hiredriverjapan.com"
+BRAND_NAME = "HIRE driver japan"
+CERT_NAME = "VVIP Service Certificate"
+CONTACT_EMAIL = ""      # destinatario delle richieste: da definire
+FROM_EMAIL = ""         # mittente Resend su dominio verificato, es. "Hire Driver Japan <info@hiredriverjapan.com>"
+
+# Segreti (wrangler secret put): ADMIN_TOKEN, RESEND_API_KEY, TURNSTILE_SECRET
+[triggers]
+crons = ["0 0 * * *"]   # 09:00 JST: scadenze certificati, rinnovi a 60 e 30 giorni, riepilogo email

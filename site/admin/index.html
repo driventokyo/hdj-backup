@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
+<title>Pannello · HIRE driver japan</title>
+<link rel="icon" href="/assets/favicon.svg">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<style>
+:root{--ink:#14202b;--mut:#5b6875;--line:#d9dee3;--bg:#f4f5f7;--acc:#1d5c86;--gold:#a8842f;--ok:#1d6b3a;--err:#a1281f}
+*{box-sizing:border-box}body{margin:0;font:14px/1.5 system-ui,-apple-system,"Hiragino Sans","PingFang SC",sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--ink);color:#fff;padding:10px 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;position:sticky;top:0;z-index:3}
+header b{color:var(--gold)}nav{display:flex;gap:4px;flex-wrap:wrap}nav button{background:none;border:0;color:#cfd7de;padding:8px 10px;border-radius:6px;font:inherit;cursor:pointer}
+nav button.on{background:#2b3a48;color:#fff}.cnt{background:var(--gold);color:var(--ink);border-radius:999px;padding:0 6px;font-size:11px;margin-left:4px;font-weight:700}
+#who{margin-left:auto;font-size:12px;color:#9aa6b1}
+main{padding:16px;max-width:1400px;margin:0 auto}
+.login{max-width:420px;margin:80px auto;background:#fff;border:1px solid var(--line);border-radius:10px;padding:24px}
+input,select,textarea{font:inherit;padding:7px 9px;border:1px solid #b9c2ca;border-radius:6px;background:#fff;width:100%}
+button.b{background:var(--acc);color:#fff;border:0;border-radius:6px;padding:7px 12px;font:inherit;cursor:pointer}button.b.s{background:#fff;color:var(--acc);border:1px solid var(--acc)}button.b.r{background:var(--err)}
+.kan{display:grid;grid-template-columns:repeat(5,minmax(220px,1fr));gap:10px;overflow-x:auto}
+.col{background:#e9ecef;border-radius:8px;padding:8px;min-height:120px}.col h4{margin:4px 4px 8px;font-size:12px;text-transform:uppercase;color:var(--mut)}
+.it{background:#fff;border:1px solid var(--line);border-radius:6px;padding:8px;margin-bottom:8px;cursor:pointer}.it small{color:var(--mut)}
+.it .t{font-weight:600}
+table{border-collapse:collapse;width:100%;background:#fff;border:1px solid var(--line)}th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:#eef1f4;font-size:12px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:end;margin:10px 0}.row>label{display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--mut);min-width:140px;flex:1}
+.panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:14px;margin:12px 0}
+.tag{display:inline-block;border-radius:999px;padding:0 8px;font-size:11px;font-weight:700;background:#eef1f4}.tag.active,.tag.pass{background:#e3f3e8;color:var(--ok)}.tag.expired,.tag.retake{background:#fdf1dc;color:#8a5a00}.tag.revoked,.tag.fail{background:#fbe5e3;color:var(--err)}
+dialog{border:0;border-radius:10px;max-width:720px;width:95%;padding:0}dialog .in{padding:18px}dialog pre{white-space:pre-wrap;background:#f6f7f9;padding:10px;border-radius:6px;max-height:300px;overflow:auto}
+.sub{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}.sub button{border:1px solid var(--line);background:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}.sub button.on{background:var(--ink);color:#fff}
+.msg{position:fixed;bottom:16px;right:16px;background:var(--ink);color:#fff;padding:10px 14px;border-radius:8px;display:none;max-width:420px}
+td input[type=number]{width:70px}
+</style>
+</head>
+<body>
+<header><b>HIRE</b> driver japan · pannello<nav id="tabs"></nav><span id="who"></span></header>
+<main id="app"></main>
+<dialog id="dlg"><div class="in" id="dlgin"></div></dialog>
+<div class="msg" id="msg"></div>
+<script>
+const $=s=>document.querySelector(s), app=$("#app");
+let TOKEN=null, ME=null;
+try{TOKEN=localStorage.getItem("hdj_token")}catch(_){}
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const toast=t=>{const m=$("#msg");m.textContent=t;m.style.display="block";clearTimeout(m._t);m._t=setTimeout(()=>m.style.display="none",3500)};
+async function api(path,body){const r=await fetch("/api/admin"+path,{method:body?"POST":"GET",headers:{"x-panel-token":TOKEN,"content-type":"application/json"},body:body?JSON.stringify(body):undefined});
+  if(r.status===401){logout();throw new Error("unauthorized")}const j=await r.json();if(!j.ok){toast("Errore: "+(j.hint||j.error));throw new Error(j.error)}return j}
+function logout(){try{localStorage.removeItem("hdj_token")}catch(_){}TOKEN=null;login()}
+const L={en:"Inglese",zh:"Cinese",it:"Italiano",fr:"Francese",es:"Spagnolo",ja:"Giapponese",other:"Altro"};
+const langs=j=>{try{return JSON.parse(j||"[]").map(x=>L[x]||x).join(", ")}catch(_){return j||""}};
+const d10=s=>(s||"").slice(0,10);
+
+function login(){$("#tabs").innerHTML="";$("#who").textContent="";
+  app.innerHTML=`<form class="login" id="lf"><h2>Accesso</h2><p>Incolla il token che ti e' stato consegnato.</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra</button></p></form>`;
+  $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
+
+const TABS_ADMIN=[["leads","Richieste"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
+const TABS_TEACHER=[["courses","Le mie sessioni"]];
+const TABS_OPERATOR=[["certs","Certificati dei miei autisti"]];
+async function start(){
+  const tabs=ME.role==="admin"?TABS_ADMIN:ME.role==="teacher"?TABS_TEACHER:TABS_OPERATOR;
+  $("#who").innerHTML=`${esc(ME.name)} · ${esc(ME.role)} · <a href="#" id="lo" style="color:#9aa6b1">esci</a>`;$("#lo").onclick=e=>{e.preventDefault();logout()};
+  $("#tabs").innerHTML=tabs.map(([k,t])=>`<button data-t="${k}">${t}<span class="cnt" id="c-${k}" hidden></span></button>`).join("");
+  $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.t)};
+  show(tabs[0][0]);counts();setInterval(counts,60000);
+}
+async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}document.title=(n?`(${n}) `:"")+"Pannello · HIRE driver japan"}catch(_){}}
+function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
+
+// ---- Richieste: pipeline
+let leadKind="service";
+const STAGES={service:["new","contacted","quoted","confirmed","lost"],training:["new","contacted","quoted","confirmed","lost"],driver:["new","interview","documents","hired","rejected"]};
+const SLAB={new:"Nuove",contacted:"Contattate",quoted:"Preventivo inviato",confirmed:"Confermate",lost:"Perse",interview:"Colloquio",documents:"Documenti",hired:"Assunti",rejected:"Scartati"};
+async function leads(){
+  app.innerHTML=`<div class="sub">${[["service","Aziende e operatori"],["training","Formazione"],["driver","Candidature autisti"]].map(([k,t])=>`<button data-k="${k}" class="${k===leadKind?"on":""}">${t}</button>`).join("")}</div><div class="kan" id="kan"></div>`;
+  app.querySelector(".sub").onclick=e=>{const b=e.target.closest("button");if(b){leadKind=b.dataset.k;leads()}};
+  const rows=(await api("/leads/"+leadKind)).rows;
+  $("#kan").innerHTML=STAGES[leadKind].map(s=>`<div class="col"><h4>${SLAB[s]} (${rows.filter(r=>r.stage===s).length})</h4>${rows.filter(r=>r.stage===s).map(r=>`<div class="it" data-id="${r.id}"><div class="t">${esc(r.company||r.full_name)}</div><small>${esc(r.id)} · ${d10(r.created_at)} · ${esc(r.site_lang)}${r.kind?" · "+(r.kind==="corporate"?"azienda":"operatore"):""}</small><br><small>${esc(r.plan||r.operator_type||r.license||"")} ${r.drivers_count?"· "+r.drivers_count+" autisti":""} ${r.languages?"· "+langs(r.languages):""}</small></div>`).join("")}</div>`).join("");
+  $("#kan").onclick=e=>{const it=e.target.closest(".it");if(it)leadDlg(rows.find(r=>r.id===it.dataset.id))};
+}
+function leadDlg(r){
+  const skip=["ip_hash","turnstile_ok"];const info=Object.entries(r).filter(([k,v])=>v!=null&&v!==""&&!skip.includes(k)).map(([k,v])=>`${k}: ${k==="languages"?langs(v):v}`).join("\n");
+  $("#dlgin").innerHTML=`<h3>${esc(r.company||r.full_name)} <small>${esc(r.id)}</small></h3><pre>${esc(info)}</pre>
+  <div class="row"><label>Stato<select id="ds">${STAGES[leadKind].map(s=>`<option value="${s}"${s===r.stage?" selected":""}>${SLAB[s]}</option>`).join("")}</select></label>
+  ${leadKind!=="driver"?`<label>Preventivo (yen, IVA esclusa)<input id="dq" type="number" value="${r.quote_jpy??""}"></label><label>Motivo perdita<input id="dl" value="${esc(r.lost_reason||"")}"></label>`:""}</div>
+  <label style="font-size:12px;color:#5b6875">Note interne<textarea id="dn" rows="3">${esc(r.notes||"")}</textarea></label>
+  <p class="row"><button class="b" id="dsave">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${leadKind==="driver"&&r.stage==="hired"&&!r.driver_id?`<button class="b s" id="mkdrv">Crea scheda autista</button>`:""}</p>`;
+  dlg.showModal();
+  $("#dsave").onclick=async()=>{const b={stage:$("#ds").value,notes:$("#dn").value};if(leadKind!=="driver"){b.quote_jpy=$("#dq").value;b.lost_reason=$("#dl").value}await api(`/leads/${leadKind}/${r.id}`,b);dlg.close();toast("Salvato");leads();counts()};
+  const mk=$("#mkdrv");if(mk)mk.onclick=async()=>{const j=await api("/drivers",{full_name:r.full_name,email:r.email,phone:r.phone,languages:JSON.parse(r.languages||"[]"),nishu_menkyo:r.license==="nishu"?1:0,employed_by_us:1});toast("Autista creato: "+j.id);dlg.close()};
+}
+const dlg=$("#dlg");
+
+// ---- Anagrafiche
+let OPS=[],DRV=[];
+async function loadPeople(){OPS=ME.role==="admin"?(await api("/operators")).rows:[];DRV=(await api("/drivers")).rows}
+async function people(){await loadPeople();
+  app.innerHTML=`<div class="panel"><h3>Nuovo operatore</h3><div class="row"><label>Ragione sociale<input id="on"></label><label>Tipo<select id="ot"><option value="hire">hire</option><option value="taxi">taxi</option><option value="yakuin">yakuin sougei</option><option value="hotel">hotel</option><option value="dmc">DMC</option><option value="company">azienda (servizio autisti)</option><option value="other">altro</option></select></label><label>Citta<input id="oc"></label><label>Referente<input id="ocn"></label><label>Email<input id="oe"></label><label>Lingua<select id="ol"><option>ja</option><option>zh</option><option>en</option></select></label><button class="b" id="osave">Aggiungi</button></div></div>
+  <div class="panel"><h3>Nuovo autista</h3><div class="row"><label>Nome completo<input id="dn2"></label><label>Nome in alfabeto latino<input id="dnl"></label><label>Operatore<select id="dop"><option value="">nessuno (nostro dipendente)</option>${OPS.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></label><label>Lingue (en,zh,it,fr,es)<input id="dlg2" placeholder="en,zh"></label><label>Mostra sul certificato<select id="ddm"><option value="initials">solo iniziali</option><option value="full">nome completo</option></select></label><label>Mostra operatore<select id="dso"><option value="0">no</option><option value="1">si</option></select></label><label>Data consenso scritto<input id="dca" type="date"></label><label>Nishu menkyo<select id="dnm"><option value="1">si</option><option value="0">in corso</option></select></label><button class="b" id="dsave2">Aggiungi</button></div></div>
+  <h3>Operatori</h3><table><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Citta</th><th>Referente</th><th>Email</th></tr>${OPS.map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}</td><td>${o.type}</td><td>${esc(o.city)}</td><td>${esc(o.contact_name)}</td><td>${esc(o.email)}</td></tr>`).join("")}</table>
+  <h3>Autisti</h3><table><tr><th>ID</th><th>Nome</th><th>Operatore</th><th>Lingue</th><th>Nishu</th><th>Visibilita</th><th>Consenso</th></tr>${DRV.map(d=>`<tr><td>${d.id}</td><td>${esc(d.full_name)}<br><small>${esc(d.name_latin||"")}</small></td><td>${esc(d.operator_name||(d.employed_by_us?"nostro dipendente":""))}</td><td>${langs(d.languages)}</td><td>${d.nishu_menkyo?"si":"in corso"}</td><td>${d.display_mode==="full"?"nome":"iniziali"}${d.show_operator?" + operatore":""}</td><td>${d10(d.consent_at)||'<span class="tag revoked">manca</span>'}</td></tr>`).join("")}</table>`;
+  $("#osave").onclick=async()=>{await api("/operators",{name:$("#on").value,type:$("#ot").value,city:$("#oc").value,contact_name:$("#ocn").value,email:$("#oe").value,lang:$("#ol").value});toast("Operatore aggiunto");people()};
+  $("#dsave2").onclick=async()=>{const op=$("#dop").value;await api("/drivers",{full_name:$("#dn2").value,name_latin:$("#dnl").value,operator_id:op||null,employed_by_us:op?0:1,languages:$("#dlg2").value.split(",").map(s=>s.trim()).filter(Boolean),display_mode:$("#ddm").value,show_operator:$("#dso").value==="1",consent_at:$("#dca").value||null,nishu_menkyo:$("#dnm").value});toast("Autista aggiunto");people()};
+}
+
+// ---- Sessioni
+let TEACHERS=[];
+async function courses(){
+  if(ME.role==="admin"){await loadPeople();TEACHERS=(await api("/users")).rows.filter(u=>u.role==="teacher"&&u.status==="active")}
+  const rows=(await api("/courses")).rows;
+  app.innerHTML=(ME.role==="admin"?`<div class="panel"><h3>Nuova sessione</h3><div class="row"><label>Operatore<select id="co">${OPS.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></label><label>Formato<select id="cf"><option value="full3">3 giorni</option><option value="day1">solo giorno 1</option><option value="lang_module">modulo lingua</option><option value="renewal">rinnovo</option></select></label><label>Lingua di erogazione<select id="cl"><option value="ja">ja</option><option value="zh">zh</option></select></label><label>Giorno 1<input id="c1" type="date"></label><label>Giorno 2<input id="c2" type="date"></label><label>Giorno 3<input id="c3" type="date"></label><label>Sede<input id="cv"></label><label>Docente<select id="ct"><option value="">admin</option>${TEACHERS.map(t=>`<option value="${t.id}">${esc(t.name)}</option>`).join("")}</select></label><label>Posti<input id="cs" type="number" value="6"></label><label>Prezzo (yen)<input id="cp" type="number"></label><button class="b" id="csave">Crea</button></div></div>`:"")+
+  `<h3>Calendario</h3><table><tr><th>ID</th><th>Date</th><th>Operatore</th><th>Formato</th><th>Lingua</th><th>Sede</th><th>Docente</th><th>Iscritti</th><th>Stato</th><th></th></tr>${rows.map(c=>`<tr><td>${c.id}</td><td>${[c.day1_date,c.day2_date,c.day3_date].filter(Boolean).join(" · ")}</td><td>${esc(c.operator_name)}</td><td>${c.format}</td><td>${c.language}</td><td>${esc(c.venue)}</td><td>${esc(c.teacher_name||"admin")}</td><td>${c.enrolled}/${c.seats??""}</td><td>${ME.role==="admin"?`<select data-cs="${c.id}">${["planned","confirmed","running","done","cancelled"].map(s=>`<option${s===c.status?" selected":""}>${s}</option>`).join("")}</select>`:c.status}</td><td><button class="b s" data-open="${c.id}">Apri</button></td></tr>`).join("")}</table><div id="cdet"></div>`;
+  const cs=$("#csave");if(cs)cs.onclick=async()=>{await api("/courses",{operator_id:$("#co").value,format:$("#cf").value,language:$("#cl").value,day1_date:$("#c1").value,day2_date:$("#c2").value,day3_date:$("#c3").value,venue:$("#cv").value,teacher_id:$("#ct").value||null,seats:$("#cs").value,price_jpy:$("#cp").value});toast("Sessione creata");courses()};
+  app.querySelectorAll("[data-cs]").forEach(s=>s.onchange=async()=>{await api("/courses/"+s.dataset.cs,{status:s.value});toast("Stato aggiornato")});
+  app.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>courseDetail(b.dataset.open));
+}
+async function courseDetail(id){
+  const rows=(await api(`/courses/${id}/enrollments`)).rows;
+  const cand=DRV.filter(d=>!rows.some(r=>r.driver_id===d.id));
+  $("#cdet").innerHTML=`<div class="panel"><h3>Sessione ${id}</h3>${ME.role==="admin"?`<div class="row"><label>Iscrivi autista<select id="ed">${cand.map(d=>`<option value="${d.id}">${esc(d.full_name)} (${esc(d.operator_name||"nostro")})</option>`).join("")}</select></label><button class="b" id="eadd">Iscrivi</button></div>`:""}
+  <p style="color:#5b6875">Soglia di superamento: 70 su 100 per ciascuna prova. Il certificato si emette solo con le tre prove superate e il consenso dell'autista registrato.</p>
+  <table><tr><th>Autista</th><th>G1</th><th>G2</th><th>G3</th><th>Orale</th><th>Pratica</th><th>Scritto</th><th>Esito</th><th>Ripetizione entro</th><th></th></tr>${rows.map(r=>`<tr data-e="${r.id}"><td>${esc(r.full_name)}</td>${["attended_d1","attended_d2","attended_d3"].map(k=>`<td><input type="checkbox" data-k="${k}"${r[k]?" checked":""}></td>`).join("")}${["score_oral","score_practical","score_written"].map(k=>`<td><input type="number" min="0" max="100" data-k="${k}" value="${r[k]??""}"></td>`).join("")}<td><span class="tag ${r.result}">${r.result}</span></td><td>${r.retake_until||""}</td><td><button class="b s" data-save>Salva</button> ${ME.role==="admin"&&r.result==="pass"&&!r.certificate_id?`<button class="b" data-issue="${r.id}" data-langs='${esc(r.driver_langs||"[]")}'>Emetti certificato</button>`:""}${ME.role==="admin"&&!r.attestation_id&&(r.format==="full3"?(r.attended_d1&&r.attended_d2&&r.attended_d3):r.attended_d1)?` <button class="b s" data-att="${r.id}" data-langs='${esc(r.driver_langs||"[]")}'>Emetti attestato</button>`:""}${r.certificate_id?` <span class="tag active">cert ${r.certificate_id}</span>`:""}${r.attestation_id?` <span class="tag">att ${r.attestation_id}</span>`:""}</td></tr>`).join("")}</table></div>`;
+  const ea=$("#eadd");if(ea)ea.onclick=async()=>{await api("/enrollments",{course_id:id,driver_id:$("#ed").value});courseDetail(id)};
+  $("#cdet").querySelectorAll("[data-save]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr"),o={};tr.querySelectorAll("[data-k]").forEach(i=>{o[i.dataset.k]=i.type==="checkbox"?i.checked:(i.value===""?null:i.value)});const j=await api("/enrollments/"+tr.dataset.e,o);toast("Esito: "+j.result);courseDetail(id)});
+  $("#cdet").querySelectorAll("[data-att]").forEach(b=>b.onclick=async()=>{const j=await api("/certificates/issue",{enrollment_id:b.dataset.att,kind:"attestation",languages:JSON.parse(b.dataset.langs)});toast("Attestato "+j.id);courseDetail(id)});
+  $("#cdet").querySelectorAll("[data-issue]").forEach(b=>b.onclick=async()=>{const lv=confirm("Livello avanzato? OK = advanced, Annulla = standard")?"advanced":"standard";const j=await api("/certificates/issue",{enrollment_id:b.dataset.issue,level:lv,languages:JSON.parse(b.dataset.langs)});toast("Certificato "+j.id);courseDetail(id)});
+}
+
+// ---- Certificati e badge
+async function certs(){
+  const rows=(await api("/certificates")).rows;
+  app.innerHTML=`<div class="row"><label>Cerca<input id="cq" placeholder="numero, nome, operatore"></label></div><table id="ctab"><tr><th>Numero</th><th>Tipo</th><th>Autista</th><th>Operatore</th><th>Livello</th><th>Lingue</th><th>Emesso</th><th>Scadenza</th><th>Stato</th><th>Visite</th><th></th></tr>${rows.map(c=>`<tr data-s="${esc((c.id+" "+c.full_name+" "+(c.operator_name||"")).toLowerCase())}"><td>${c.id}</td><td>${c.kind==="attestation"?"attestato":"certificato"}</td><td>${esc(c.full_name)}</td><td>${esc(c.operator_name||"")}</td><td>${c.level}</td><td>${langs(c.languages)}</td><td>${c.issued_at}</td><td>${c.expires_at==="9999-12-31"?"senza scadenza":c.expires_at}</td><td><span class="tag ${c.status}">${c.status}</span></td><td>${c.views}</td><td><button class="b s" data-png="${c.id}">PNG</button> <button class="b s" data-pdf="${c.id}">PDF</button> <button class="b s" data-copy="${esc(c.verify_url)}">Link</button>${ME.role==="admin"&&c.status==="active"?` <button class="b r" data-rev="${c.id}">Revoca</button>`:""}</td></tr>`).join("")}</table>`;
+  $("#cq").oninput=e=>{const q=e.target.value.toLowerCase();app.querySelectorAll("#ctab tr[data-s]").forEach(tr=>tr.style.display=tr.dataset.s.includes(q)?"":"none")};
+  const find=id=>rows.find(r=>r.id===id);
+  app.querySelectorAll("[data-png]").forEach(b=>b.onclick=()=>badgePNG(find(b.dataset.png)));
+  app.querySelectorAll("[data-pdf]").forEach(b=>b.onclick=()=>badgePDF(find(b.dataset.pdf)));
+  app.querySelectorAll("[data-copy]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.copy);toast("Link di verifica copiato")});
+  app.querySelectorAll("[data-rev]").forEach(b=>b.onclick=async()=>{const r=prompt("Motivo della revoca");if(r===null)return;await api(`/certificates/${b.dataset.rev}/revoke`,{reason:r});toast("Revocato");certs()});
+}
+function qrURL(text,cell){const q=qrcode(0,"M");q.addData(text);q.make();return q.createDataURL(cell,cell*2)}
+function badgeName(c){return c.name_latin||c.full_name}
+function docLabel(c){return c.kind==="attestation"?"Attestation of completion":"VVIP Service Certificate"}
+function badgePNG(c){
+  const W=1012,H=638,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  x.fillStyle="#14110E";x.fillRect(0,0,W,H);x.fillStyle="#C7A36A";x.fillRect(0,H-10,W,10);
+  x.strokeStyle="#C7A36A";x.lineWidth=3;x.beginPath();[[57,40],[79,40],[96,57],[96,79],[79,96],[57,96],[40,79],[40,57]].forEach((p,i)=>i?x.lineTo(...p):x.moveTo(...p));x.closePath();x.stroke();x.fillStyle="#C7A36A";x.font="600 34px Georgia,serif";x.textAlign="center";x.fillText("H",68,80);x.textAlign="left";
+  x.fillStyle="#C7A36A";x.font="600 26px Georgia,serif";x.fillText("HIRE",112,66);const hw=x.measureText("HIRE ").width;x.fillStyle="#F1EADC";x.font="300 20px system-ui";x.fillText("driver japan",112+hw,66);x.fillStyle="#b9c3cc";x.font="16px system-ui";x.fillText(docLabel(c),112,90);
+  x.fillStyle="#fff";x.font="700 44px system-ui";x.fillText(badgeName(c),40,220);
+  x.fillStyle="#b9c3cc";x.font="20px system-ui";
+  [["No.",c.id],["Level",c.level],["Languages",langs(c.languages)],["Valid until",c.expires_at==="9999-12-31"?"No expiry":c.expires_at]].forEach(([k,v],i)=>{x.fillStyle="#8a97a3";x.fillText(k,40,290+i*48);x.fillStyle="#fff";x.font="600 22px system-ui";x.fillText(v,200,290+i*48);x.font="20px system-ui"});
+  x.fillStyle="#8a97a3";x.font="14px system-ui";x.fillText("Private document issued by HIRE driver japan. Not a national qualification.",40,H-40);
+  const img=new Image();img.onload=()=>{x.fillStyle="#fff";x.fillRect(W-300,170,260,260);x.drawImage(img,W-290,180,240,240);x.fillStyle="#b9c3cc";x.font="14px system-ui";x.textAlign="center";x.fillText("Scan to verify",W-170,455);
+    const a=document.createElement("a");a.download=`badge-${c.id}.png`;a.href=cv.toDataURL("image/png");a.click()};
+  img.src=qrURL(c.verify_url,8);
+}
+function badgePDF(c){
+  const w=window.open("","_blank");if(!w){toast("Consenti i popup per stampare");return}
+  w.document.write(`<!doctype html><html><head><meta charset="utf-8"><title>Badge ${c.id}</title><style>@page{size:86mm 54mm;margin:0}body{margin:0;font-family:system-ui,"Hiragino Sans","PingFang SC",sans-serif}
+  .c{width:86mm;height:54mm;background:#14110E;color:#fff;padding:4mm;box-sizing:border-box;position:relative;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .b{font-size:3mm;color:#C7A36A;letter-spacing:.06em;font-weight:700}.n{font-size:4.6mm;font-weight:700;margin:3mm 0 2mm}.k{font-size:2.4mm;color:#8a97a3}.v{font-size:2.8mm;margin-bottom:1mm}
+  .q{position:absolute;right:4mm;top:12mm;background:#fff;padding:1mm}.q img{width:22mm;height:22mm;display:block}.f{position:absolute;left:4mm;bottom:3mm;font-size:1.8mm;color:#8a97a3;right:4mm}</style></head><body>
+  <div class="c"><div class="b">HIRE driver japan · ${esc(docLabel(c))}</div><div class="n">${esc(badgeName(c))}</div>
+  <div class="k">No.</div><div class="v">${c.id}</div><div class="k">Languages</div><div class="v">${esc(langs(c.languages))}</div><div class="k">Valid until</div><div class="v">${c.expires_at==="9999-12-31"?"No expiry":c.expires_at}</div>
+  <div class="q"><img src="${qrURL(c.verify_url,6)}" alt=""></div><div class="f">Private document issued by HIRE driver japan. Not a national qualification. Verify: scan the QR code.</div></div>
+  <script>setTimeout(function(){window.print()},300)<\/script></body></html>`);w.document.close();
+}
+
+// ---- Rinnovi
+async function renew(){const rows=(await api("/renewals")).rows;
+  app.innerHTML=`<h3>Certificati in scadenza entro 60 giorni</h3><table><tr><th>Certificato</th><th>Autista</th><th>Operatore</th><th>Scadenza</th><th>Giorni</th><th>Rinnovo</th><th>Promemoria 60</th><th>Promemoria 30</th></tr>${rows.map(r=>`<tr><td>${r.certificate_id}</td><td>${esc(r.full_name)}</td><td>${esc(r.operator_name||"")}</td><td>${r.expires_at}</td><td>${r.days_left}</td><td>${r.renewal_status||"da creare (cron)"}</td><td>${d10(r.reminded_60_at)}</td><td>${d10(r.reminded_30_at)}</td></tr>`).join("")||'<tr><td colspan="8">Nessuno</td></tr>'}</table><p style="color:#5b6875">Per rinnovare: crea una sessione con formato "rinnovo", iscrivi l'autista, registra i voti ed emetti il nuovo certificato. Il vecchio passa a "superseded".</p>`}
+
+// ---- Utenti
+async function users(){await loadPeople();const rows=(await api("/users")).rows;
+  app.innerHTML=`<div class="panel"><h3>Nuovo accesso</h3><div class="row"><label>Nome<input id="un"></label><label>Email<input id="ue"></label><label>Ruolo<select id="ur"><option value="teacher">docente</option><option value="operator">operatore</option><option value="admin">admin</option></select></label><label>Operatore (solo ruolo operatore)<select id="uo"><option value="">nessuno</option>${OPS.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></label><button class="b" id="usave">Crea e mostra token</button></div></div>
+  <table><tr><th>ID</th><th>Nome</th><th>Ruolo</th><th>Email</th><th>Operatore</th><th>Stato</th></tr>${rows.map(u=>`<tr><td>${u.id}</td><td>${esc(u.name)}</td><td>${u.role}</td><td>${esc(u.email)}</td><td>${esc(u.operator_id||"")}</td><td>${u.status}</td></tr>`).join("")}</table>`;
+  $("#usave").onclick=async()=>{const j=await api("/users",{name:$("#un").value,email:$("#ue").value,role:$("#ur").value,operator_id:$("#uo").value||null});$("#dlgin").innerHTML=`<h3>Token per ${esc($("#un").value)}</h3><p>${esc(j.warning)}</p><pre>${esc(j.token)}</pre><button class="b" onclick="dlg.close()">Fatto</button>`;dlg.showModal();users()};
+}
+
+// ---- Export
+function exportTab(){const T=["leads_service","leads_training","driver_applications","operators","drivers","courses","enrollments","certificates","renewals"];
+  app.innerHTML=`<h3>Export CSV</h3><p>${T.map(t=>`<button class="b s" data-x="${t}" style="margin:4px">${t}</button>`).join("")}</p>`;
+  app.querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{const r=await fetch(`/api/admin/export/${b.dataset.x}.csv`,{headers:{"x-panel-token":TOKEN}});if(!r.ok){toast("Errore export");return}const bl=await r.blob();const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=`${b.dataset.x}.csv`;a.click()})}
+
+TOKEN?api("/me").then(j=>{ME=j.user;start()}).catch(login):login();
+</script>
+</body>
+</html>

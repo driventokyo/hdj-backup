@@ -1,0 +1,68 @@
+seed,lingua,tipo
+英語対応 ハイヤー ドライバー,ja,originale
+外国語対応 乗務員,ja,originale
+インバウンド対応 ドライバー,ja,originale
+英語が話せる 運転手,ja,originale
+外国人VIP 送迎,ja,originale
+二種免許 英語,ja,originale
+多言語 ドライバー 東京,ja,originale
+登録ドライバー ハイヤー,ja,originale
+ハイヤー 乗務員 兼業,ja,originale
+ハイヤー ドライバー 紹介,ja,originale
+外国語 ドライバー 不足,ja,originale
+英語 タクシー 運転手 東京,ja,originale
+ハイヤー ドライバー,ja,derivato
+ハイヤー 乗務員,ja,derivato
+ハイヤー 英語,ja,derivato
+英語 運転手,ja,derivato
+英語 ドライバー,ja,derivato
+外国語 ドライバー,ja,derivato
+インバウンド ドライバー,ja,derivato
+二種免許,ja,derivato
+二種免許 外国人,ja,derivato
+多言語 ドライバー,ja,derivato
+外国人 送迎,ja,derivato
+VIP 送迎,ja,derivato
+英語 タクシー,ja,derivato
+ドライバー 紹介,ja,derivato
+乗務員 兼業,ja,derivato
+ハイヤー 求人,ja,derivato
+タクシー 英語 求人,ja,derivato
+日本 包车 司机 英语,zh,originale
+东京 英语司机,zh,originale
+日本 二种驾照 司机,zh,originale
+日本 专车司机 多语种,zh,originale
+日本 高端接送 司机,zh,originale
+日本 司机 兼职,zh,originale
+东京 旅游 用车 司机 招聘,zh,originale
+日本 包车 公司 招司机,zh,originale
+日本 包车,zh,derivato
+日本 司机,zh,derivato
+东京 司机,zh,derivato
+日本 司机 招聘,zh,derivato
+日本 包车 司机,zh,derivato
+日本 二种驾照,zh,derivato
+东京 包车,zh,derivato
+日本 专车,zh,derivato
+english speaking driver japan,en,originale
+english speaking driver tokyo,en,originale
+professional driver japan,en,originale
+multilingual chauffeur tokyo,en,originale
+hire driver japan,en,originale
+bilingual driver jobs japan,en,originale
+chauffeur jobs tokyo english,en,originale
+english driver japan,en,derivato
+driver japan,en,derivato
+chauffeur tokyo,en,derivato
+chauffeur japan,en,derivato
+driver jobs japan,en,derivato
+driver jobs tokyo,en,derivato
+bilingual driver,en,derivato
+役員運転手,ja,derivato_aziende
+社用車 運転手,ja,derivato_aziende
+専属運転手,ja,derivato_aziende
+運転手 スポット,ja,derivato_aziende
+運転手 派遣 法人,ja,derivato_aziende
+役員車 運転,ja,derivato_aziende
+運転業務 委託,ja,derivato_aziende
+英語 運転手 派遣,ja,derivato_aziende
