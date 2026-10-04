@@ -103,7 +103,7 @@ function social(l, title, desc, url) {
 }
 
 function jsonld(page, l, p) {
-  const org = { "@type": "Organization", "@id": C.SITE_URL + "/#org", name: C.BRAND_NAME, legalName: C.COMPANY_EN, alternateName: [C.COMPANY_JA, C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", logo: { "@type": "ImageObject", url: C.SITE_URL + "/assets/icon-512.png", width: 512, height: 512 } };
+  const org = { "@type": "Organization", "@id": C.SITE_URL + "/#org", name: C.BRAND_NAME, alternateName: [C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", logo: { "@type": "ImageObject", url: C.SITE_URL + "/assets/icon-512.png", width: 512, height: 512 } };
   if (C.CONTACT_EMAIL) org.email = C.CONTACT_EMAIL;
   const graph = [org, { "@type": "WebSite", "@id": C.SITE_URL + "/#site", name: C.BRAND_NAME, alternateName: [C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", inLanguage: LANG_META[l].html, publisher: { "@id": C.SITE_URL + "/#org" } }];
   if (page === "training") {
