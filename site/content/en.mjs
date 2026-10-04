@@ -51,7 +51,7 @@ export default {
           { h3: "Billed by the hour", p: "We bill actual hours worked, once a month." },
         ], note: "This is a contracted driving service. We do not carry passengers ourselves, and we charge by the hour, never by distance or by trip. We direct and supervise our drivers." },
         { type: "table", id: "plans", h2: "Plans and rates", head: ["Plan", "What it includes", "Minimum", "Rate"], rows: [
-          ["Standard", "Booked by 5 pm the day before. Driver speaks Japanese and English.", "{{MIN:standard}} hours", "{{PRICE:standard}}"],
+          ["Standard", "Booked by 5 pm the day before. Driver speaks Japanese, English, Italian, French and Spanish.", "{{MIN:standard}} hours", "{{PRICE:standard}}"],
           ["Short notice", "Same-day or urgent requests, subject to availability.", "{{MIN:casual}} hours", "{{PRICE:casual}}"],
           ["VIP", "Driver holding {{CERT}}. VIP protocol, confidentiality, your choice of language.", "{{MIN:vip}} hours", "{{PRICE:vip}}"],
         ], notes: ["Rates exclude consumption tax. Fuel, tolls and parking are charged at cost.", "Late night, early morning, long days and multi-day bookings are quoted individually."] },
