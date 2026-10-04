@@ -34,8 +34,9 @@ export default {
       title: "会外语的包车司机｜五种语言・二种驾照｜致包车与出租车公司｜{{BRAND}}",
       meta: "致在日包车和出租车公司：持有二种驾照、能用日语、英语、意大利语、法语和西班牙语接待的司机，以兼职员工身份加入贵公司，负责外国贵宾的订单。另提供司机贵宾服务培训与认证。",
       h1: "外国贵宾的订单，不必再推掉。",
-      hero: { kicker: "致包车与出租车公司（东京）", sub: "持有二种驾照、会五种语言的司机{{TEACHER}}，以兼职员工身份加入贵公司，负责外国客人的订单。", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "司机 {{TEACHER}}", cap: "图片仅供参考。驾驶的是贵公司的车辆。" }, ctas: [{ label: "咨询雇用", href: "#form" }, { label: "查看培训与认证", href: "training" }] },
+      hero: { kicker: "致包车与出租车公司（东京）", sub: "持有二种驾照、会五种语言的司机{{TEACHER}}，以兼职员工身份加入贵公司，负责外国客人的订单。", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "司机 {{TEACHER}}", cap: "图片仅供参考。驾驶的是贵公司的车辆。" }, ctas: [{ label: "立即预约", href: "#book", book: true }, { label: "查看培训与认证", href: "training" }] },
       blocks: [
+        { type: "form", id: "book", form: "book", accent: true, h2: "立即预约　BOOK ME NOW", intro: "接到外国客人的订单后，只需告诉我们日期和所需语言，当天回复。工作以贵公司雇用并选任的司机身份进行。", submit: "立即预约" },
         { type: "cards", h2: "我们能提供什么", cols: 3, items: [
           { tag: "接受中", h3: "会外语的司机", p: "由贵公司雇用并选任，驾驶贵公司的车辆，负责外国客人的订单。工作日每月商量。" },
           { tag: "接受中", h3: "司机培训与认证", p: "为贵公司的司机提供贵宾接待和服务外语的三天培训，考试合格者获得{{CERT}}。", foot: "{{LINK:training|培训详情}}" },

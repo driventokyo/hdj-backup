@@ -120,3 +120,9 @@ h1,h2,h3,.sub{text-wrap:balance}
 .hero.pf .wrap{grid-template-columns:.9fr 1.1fr}
 .himg figcaption{color:var(--mut);font-size:12px;line-height:1.5;padding:8px 2px 0}
 @media (max-width:860px){.hero.pf{padding-top:20px}.hero.pf .himg{order:-1}.hero.pf .wrap{grid-template-columns:1fr}}
+
+/* Prenotazione rapida: subito sotto la foto e la presentazione */
+.formsec.accent{padding:28px 0 8px}.formsec.accent .inner{border:1px solid var(--gold);border-radius:12px;padding:22px 20px 8px;background:radial-gradient(120% 90% at 85% 0%,rgba(199,163,106,.12),transparent 60%),var(--ink2)}
+.formsec.accent h2{margin-top:0}.formsec.accent h2::before{display:none}
+.formsec.accent .lead button[type=submit]{width:100%;font-size:18px;padding:16px 20px;letter-spacing:.06em}
+.btn.book{font-size:17px;padding:16px 26px;letter-spacing:.08em;text-transform:uppercase}

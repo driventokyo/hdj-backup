@@ -34,8 +34,9 @@ export default {
       title: "外国語対応のハイヤー乗務員｜5か国語・第二種免許｜ハイヤー・タクシー事業者さまへ｜{{BRAND}}",
       meta: "ハイヤー・タクシー事業者さまへ。第二種免許を持ち、日本語、英語、イタリア語、フランス語、スペイン語で接客できるドライバーが、御社のパートタイム乗務員として外国人VIPのご依頼を担当します。乗務員向けのVIP研修と認証も。",
       h1: "外国人VIPのご依頼を、断らずに済む乗務員を。",
-      hero: { kicker: "ハイヤー・タクシー事業者さま向け（東京）", sub: "第二種免許を持ち、5か国語で接客できるドライバー{{TEACHER}}が、御社のパートタイム乗務員として、外国人のお客さまのご依頼を担当します。", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "ドライバー {{TEACHER}}", cap: "写真はイメージです。乗務は御社の車両で行います。" }, ctas: [{ label: "雇用について相談する", href: "#form" }, { label: "研修と認証を見る", href: "training" }] },
+      hero: { kicker: "ハイヤー・タクシー事業者さま向け（東京）", sub: "第二種免許を持ち、5か国語で接客できるドライバー{{TEACHER}}が、御社のパートタイム乗務員として、外国人のお客さまのご依頼を担当します。", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "ドライバー {{TEACHER}}", cap: "写真はイメージです。乗務は御社の車両で行います。" }, ctas: [{ label: "今すぐ予約する", href: "#book", book: true }, { label: "研修と認証を見る", href: "training" }] },
       blocks: [
+        { type: "form", id: "book", form: "book", accent: true, h2: "今すぐ予約　BOOK ME NOW", intro: "外国人のお客さまのご依頼が入ったら、日時と言語だけお知らせください。2営業日以内ではなく、当日中にご返事します。乗務は御社に雇用・選任された乗務員として行います。", submit: "今すぐ予約する" },
         { type: "cards", h2: "ご提供できること", cols: 3, items: [
           { tag: "受付中", h3: "外国語対応の乗務員", p: "御社に雇用され、選任された乗務員として、御社の車両で外国人のお客さまのご依頼を担当します。勤務日は月ごとにご相談します。" },
           { tag: "受付中", h3: "乗務員研修と認証", p: "御社の乗務員向けに、VIP対応と接客外国語の3日間研修を行い、試験に合格した方に{{CERT}}を発行します。", foot: "{{LINK:training|研修の詳細}}" },

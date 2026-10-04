@@ -60,7 +60,7 @@ async function lead(req, env, ctx) {
   let b; try { b = JSON.parse(raw); } catch { return json({ ok: false, error: "bad_json" }, 400); }
   if (b.website) return json({ ok: true, id: null }); // honeypot: risposta muta
   const type = b.type, lang = LANGS.includes(b.lang) ? b.lang : "en";
-  if (!["corporate", "operator", "training", "driver"].includes(type)) return json({ ok: false, error: "bad_type" }, 400);
+  if (!["corporate", "operator", "training", "driver", "book"].includes(type)) return json({ ok: false, error: "bad_type" }, 400);
   if (b.consent !== "1" && b.consent !== true) return json({ ok: false, error: "consent_required" }, 400);
   if (!emailOk(b.email)) return json({ ok: false, error: "bad_email" }, 400);
 
@@ -80,13 +80,14 @@ async function lead(req, env, ctx) {
   const t = now();
   const attr = [str(b.utm_source, 100), str(b.utm_medium, 100), str(b.utm_campaign, 100), str(b.referrer, 300), str(b.landing, 200), ipHash, ts];
   let id, table, summary;
-  if (type === "corporate" || type === "operator") {
+  if (type === "corporate" || type === "operator" || type === "book") {
     if (!str(b.company) || !str(b.contact) || !str(b.city)) return json({ ok: false, error: "missing_fields" }, 400);
+    if (type === "book" && !str(b.date)) return json({ ok: false, error: "missing_fields" }, 400);
     if (type === "operator" && !str(b.optype)) return json({ ok: false, error: "missing_fields" }, 400);
-    id = rid(type === "corporate" ? "LC" : "LO"); table = "leads_service";
+    id = rid(type === "corporate" ? "LC" : type === "book" ? "LB" : "LO"); table = "leads_service";
     await env.DB.prepare(`INSERT INTO leads_service (id,created_at,updated_at,kind,site_lang,company,contact_name,email,phone,line_id,wechat_id,plan,service_date,hours,languages,vehicle,city,operator_type,fleet,interest,message,consent,utm_source,utm_medium,utm_campaign,referrer,landing,ip_hash,turnstile_ok) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,1,?,?,?,?,?,?,?)`)
       .bind(id, t, t, type, lang, str(b.company), str(b.contact), b.email, str(b.phone, 40), str(b.line, 60), str(b.wechat, 60), str(b.plan, 20), str(b.date), int(b.hours, 1, 24), arr(b.languages, LANG_CODES), str(b.vehicle), str(b.city), str(b.optype, 20), int(b.fleet, 0, 99999), str(b.interest, 20), str(b.message, 2000), ...attr).run();
-    summary = { [type === "corporate" ? "Azienda" : "Operatore"]: b.company, Referente: b.contact, Email: b.email, Telefono: b.phone, Piano: b.plan, Data: b.date, Ore: b.hours, Lingue: [].concat(b.languages || []).join(", "), Veicolo: b.vehicle, Citta: b.city, Tipo: b.optype, Flotta: b.fleet, Interesse: b.interest, LINE: b.line, WeChat: b.wechat, Messaggio: b.message };
+    summary = { [type === "corporate" ? "Azienda" : type === "book" ? "Prenotazione rapida (azienda hire)" : "Operatore"]: b.company, Referente: b.contact, Email: b.email, Telefono: b.phone, Piano: b.plan, Data: b.date, Ore: b.hours, Lingue: [].concat(b.languages || []).join(", "), Veicolo: b.vehicle, Citta: b.city, Tipo: b.optype, Flotta: b.fleet, Interesse: b.interest, LINE: b.line, WeChat: b.wechat, Messaggio: b.message };
   } else if (type === "training") {
     if (!str(b.company) || !str(b.optype) || !int(b.drivers, 1, 999) || !str(b.city) || !str(b.contact)) return json({ ok: false, error: "missing_fields" }, 400);
     id = rid("LT"); table = "leads_training";
@@ -113,7 +114,7 @@ async function notify(env, x) {
   if (!env.RESEND_API_KEY || !env.FROM_EMAIL) { console.log("email non inviata: RESEND_API_KEY o FROM_EMAIL mancanti", x.id); return; }
   const send = (o) => fetch("https://api.resend.com/emails", { method: "POST", headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `${x.id}-${o.tag}` }, body: JSON.stringify(o.body) });
   const rows = Object.entries(x.summary).filter(([, v]) => v != null && v !== "").map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5b6875">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join("");
-  const label = { corporate: "Azienda", operator: "Operatore", training: "Formazione", driver: "Candidatura autista" }[x.type];
+  const label = { corporate: "Azienda", operator: "Operatore", book: "PRENOTAZIONE RAPIDA", training: "Formazione", driver: "Candidatura autista" }[x.type];
   if (env.CONTACT_EMAIL) await send({ tag: "int", body: { from: env.FROM_EMAIL, to: [env.CONTACT_EMAIL], reply_to: x.email, subject: `[${label}] ${x.id} ${x.summary.Azienda || x.summary.Operatore || x.summary.Nome || ""}`, html: `<p><b>${esc(label)}</b> · ${esc(x.id)} · lingua ${esc(x.lang)}</p><table style="font:14px system-ui">${rows}</table><p><a href="${esc(env.SITE_URL)}/admin/">Apri il pannello</a></p>` } });
   const a = AUTO[x.lang] || AUTO.en; const brand = env.BRAND_NAME || "";
   await send({ tag: "ack", body: { from: env.FROM_EMAIL, to: [x.email], subject: `${a.s} | ${brand}`, text: a.b(x.name || "", x.id) + brand, ...(env.CONTACT_EMAIL ? { reply_to: env.CONTACT_EMAIL } : {}) } });
