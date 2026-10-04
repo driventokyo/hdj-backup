@@ -1,7 +1,7 @@
 // English version: corporate clients, foreign companies in Japan, hotels, DMCs and overseas agencies.
 export default {
   ui: {
-    skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
+    repPh: "Representative (to be published)", emailPh: "Contact email (coming soon)", datePh: "Date (set on publication)", skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
     privacyLink: "Privacy notice", operatedBy: "Operated by", verifyNav: "Verify a certificate", onQuote: "On request", fromHour: "From % per hour (excl. tax)",
     teacherPh: "Trainer name (to be published)", photoPh: "Trainer photo (coming soon)", addressPh: "Registered address (coming soon)",
     certNo: "Certificate number", verifyBtn: "Verify", verifyHint: "Certificate numbers look like 2026-0001. You can also scan the QR code the driver shows you.", scanBtn: "Scan a QR code",
@@ -165,13 +165,56 @@ export default {
       blocks: [ { type: "verify" }, { type: "notice", paras: ["{{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification."] } ],
     },
     privacy: {
-      title: "Privacy Notice | {{BRAND}}", meta: "How {{COMPANY}} handles personal data.", noindex: true,
-      h1: "Privacy notice", sub: "{{PH:Final wording to be supplied. Structure below is a draft.}}",
+      title: "Privacy Notice | {{BRAND}}", meta: "How {{COMPANY}} ({{BRAND}}) handles personal information: what we collect, why, who processes it for us, how we protect it and how to make a request.", noindex: true,
+      h1: "Privacy notice", sub: "{{COMPANY}} (\"we\") operates {{BRAND}}. We handle personal information in line with Japan's Act on the Protection of Personal Information (APPI) and other applicable laws, as set out below.",
       blocks: [
-        { type: "text", h2: "What we collect and why", paras: ["Names, contact details and company details sent through our enquiry, application and training forms are used only to reply, quote, select candidates, run training and issue and verify certificates."] },
-        { type: "text", h2: "Public certificate information", paras: ["The verification page shows only what the driver has agreed to: full name or initials, and whether to show their employer. Drivers can change or withdraw consent at any time."] },
-        { type: "text", h2: "Sharing", paras: ["We do not share personal data with third parties without consent, except where required by law. We use outside providers to send email and store data. {{PH:list of processors}}"] },
-        { type: "text", h2: "Contact", paras: ["{{COMPANY}} {{PH:privacy contact and email}}"] },
+        { type: "text", h2: "Who we are", list: ["Name: {{COMPANY}} (service name: {{BRAND}})", "Address: {{ADDRESS}}", "Representative: {{REP}}", "Privacy contact: {{PRIVACY_EMAIL}}"] },
+        { type: "text", h2: "What we collect", paras: ["We collect the following information by fair means."], list: [
+          "Enquiries (companies, operators and training requests): company or organisation, contact person's name, email, phone, LINE ID, WeChat ID, dates, hours, area and vehicle, type of business, fleet size, number of trainees and your message",
+          "Driver pre-registration: name, email, phone, area, licence type and years of driving, language level, nationality and residence status category, availability and your message",
+          "Training and certification: trainee's name (in Japanese and Latin script), employer, languages, exam results, certificate or attestation number, issue and expiry dates",
+          "Collected automatically: pages viewed, referring page, campaign parameters in links, time of submission, and an irreversible identifier derived from the IP address to block repeated abusive submissions (the IP address itself is not stored)",
+        ], note: "We do not ask for special care-required personal information under the APPI, such as race, beliefs, medical history or criminal record. Please do not include it in free-text fields." },
+        { type: "text", h2: "Why we use it", list: [
+          "To answer enquiries, prepare quotes, conclude and perform contracts, and invoice",
+          "To arrange driving schedules and itineraries, and to contact you on the day",
+          "To run training and exams, issue attestations and certificates, send renewal notices and show certificate status on the verification page",
+          "To contact pre-registered drivers about future work",
+          "To improve our service, understand how the site is used and prevent abusive submissions",
+          "To comply with the law",
+        ], note: "We will ask for your consent before using personal information for any other purpose." },
+        { type: "text", h2: "The certificate verification page", paras: ["The verification page shows only what the certificate holder has agreed to publish (full name or initials, and whether the employer is shown), together with the type of certificate, languages, expiry date and whether it is active, expired or revoked. The holder can change or withdraw this consent at any time."] },
+        { type: "text", h2: "Sharing with third parties", paras: ["We do not share personal information with third parties without your consent, except:"], list: [
+          "where required by law",
+          "where necessary to protect a person's life, body or property and consent is difficult to obtain",
+          "where necessary to cooperate with public authorities carrying out duties prescribed by law",
+        ], note: "If you ask for a car with a driver and we refer you to a licensed partner operator, we will ask for your consent first and pass on only what the referral needs." },
+        { type: "text", h2: "Service providers and processing outside Japan", paras: [
+          "We entrust the handling of personal information to the following providers, only as needed for the purposes above. Both are based in the United States, and data may be stored on servers outside Japan.",
+        ], list: [
+          "Cloudflare, Inc. (USA): website and database hosting, abuse prevention",
+          "Resend, Inc. (USA): sending emails such as replies to enquiries",
+        ], note: "These providers maintain systems to take measures equivalent to those required by the APPI on an ongoing basis. For information on the United States' personal data protection system, see the materials published by Japan's Personal Information Protection Commission. Under Article 28(3) of the APPI, we will provide information on the measures taken by these providers on request." },
+        { type: "text", ifConfig: "GA4_ID", h2: "Analytics", paras: ["We use Google Analytics, provided by Google LLC (USA), to understand how the site is used. It uses cookies and collects usage data that does not identify you. You can opt out with Google's browser add-on at tools.google.com/dlpage/gaoptout."] },
+        { type: "text", h2: "How we protect your information", list: [
+          "Organisational: our representative is responsible for personal information, and we define which data is handled and by whom.",
+          "People: everyone who handles personal information is bound by confidentiality and trained in how to handle it.",
+          "Physical: devices that hold personal information are locked and password protected, with screen lock and encryption when taken outside.",
+          "Technical: the admin panel is limited to authorised users by token, all connections are encrypted, and IP addresses are not stored but converted into an irreversible form.",
+          "Foreign environment: for providers handling data outside Japan, we take account of the data protection system of the country concerned.",
+        ] },
+        { type: "text", h2: "How long we keep it", list: [
+          "Enquiries and quotes: three years from our last contact",
+          "Contract and billing records: for the period required by law",
+          "Driver pre-registration: two years from registration, or until you ask us to delete it",
+          "Attestation and certificate records: five years after expiry, so that their status can still be verified",
+        ], note: "Information past its retention period is deleted so that it cannot be restored." },
+        { type: "text", h2: "Your requests", paras: [
+          "You or your representative may ask us to notify you of the purpose of use, to disclose the personal data we hold (including records of disclosure to third parties), to correct, add to or delete it, to stop using or erase it, or to stop sharing it with third parties.",
+          "Please email our privacy contact at {{PRIVACY_EMAIL}}. Once we have confirmed your identity, we will respond without delay and free of charge. If the law does not allow us to meet a request, we will explain why.",
+        ] },
+        { type: "text", h2: "Complaints and questions", paras: ["{{COMPANY}}, privacy contact, {{PRIVACY_EMAIL}}, {{ADDRESS}}"] },
+        { type: "text", h2: "Changes", paras: ["We may update this notice when laws or our services change. Significant changes will be announced on this page.", "Effective date: {{PRIVACY_DATE}}"], note: "The Japanese version of this notice is the governing text. The English and Chinese versions are translations for reference." },
       ],
     },
   },

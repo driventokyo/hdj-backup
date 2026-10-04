@@ -8,6 +8,10 @@ export const CONFIG = {
   COMPANY_EN: "6 Ltd",
   COMPANY_ZH: "6株式会社",
   COMPANY_ADDRESS: null,                    // indirizzo legale: da inserire
+  REPRESENTATIVE_JA: null,                  // rappresentante legale come in visura, es. "代表取締役 ○○○○" (obbligatorio nella privacy, art. 32)
+  REPRESENTATIVE_EN: null,                  // es. "Representative Director ○○○○"
+  PRIVACY_EMAIL: null,                      // casella per richieste privacy; se null usa CONTACT_EMAIL
+  PRIVACY_DATE: null,                       // data di entrata in vigore, es. "2026-10-10"
   SITE_URL: "https://hiredriverjapan.com",
   CONTACT_EMAIL: null,                      // destinatario delle richieste: va anche nella variabile del Worker
   TEACHER_NAME: "Fulvio",                      // nome del docente
