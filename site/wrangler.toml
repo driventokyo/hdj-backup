@@ -25,11 +25,11 @@ database_id = "8f355aee-c240-4828-9240-b9f9644856c7"
 SITE_URL = "https://hiredriverjapan.com"
 BRAND_NAME = "HIRE driver japan"
 CERT_NAME = "VVIP Service Certificate"
-CONTACT_EMAIL = ""      # destinatario delle richieste: da definire
+CONTACT_EMAIL = "info@hiredriverjapan.com"      # inoltrata da Cloudflare a 6designkk@gmail.com
 FROM_EMAIL = ""         # mittente su dominio verificato, es. "HIRE driver japan <info@hiredriverjapan.com>"
 # Fattura provvigioni (適格請求書): emittente legale, indirizzo, numero di registrazione T+13 cifre, coordinate bancarie
 INVOICE_ISSUER = "6株式会社"
-INVOICE_ADDRESS = ""
+INVOICE_ADDRESS = "徳島県板野郡藍住町笠木字中野137"
 INVOICE_REG_NO = ""
 INVOICE_BANK = ""
 

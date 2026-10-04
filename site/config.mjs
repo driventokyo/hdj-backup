@@ -7,13 +7,14 @@ export const CONFIG = {
   COMPANY_JA: "6株式会社",
   COMPANY_EN: "6 Ltd",
   COMPANY_ZH: "6株式会社",
-  COMPANY_ADDRESS: null,                    // indirizzo legale: da inserire
-  REPRESENTATIVE_JA: null,                  // rappresentante legale come in visura, es. "代表取締役 ○○○○" (obbligatorio nella privacy, art. 32)
-  REPRESENTATIVE_EN: null,                  // es. "Representative Director ○○○○"
-  PRIVACY_EMAIL: null,                      // casella per richieste privacy; se null usa CONTACT_EMAIL
+  COMPANY_ADDRESS: "徳島県板野郡藍住町笠木字中野137",                 // come nella pagina legale di Driven Tokyo
+  COMPANY_ADDRESS_EN: "137 Nakano, Kasagi, Aizumi-cho, Itano-gun, Tokushima, Japan",
+  REPRESENTATIVE_JA: "代表取締役社長 コンベルシ フルビオ",                  // rappresentante legale come in visura, es. "代表取締役 ○○○○" (obbligatorio nella privacy, art. 32)
+  REPRESENTATIVE_EN: "Fulvio Conversi, Representative Director and President",                  // es. "Representative Director ○○○○"
+  PRIVACY_EMAIL: "info@hiredriverjapan.com",                      // casella per richieste privacy; se null usa CONTACT_EMAIL
   PRIVACY_DATE: null,                       // data di entrata in vigore, es. "2026-10-10"
   SITE_URL: "https://hiredriverjapan.com",
-  CONTACT_EMAIL: null,                      // destinatario delle richieste: va anche nella variabile del Worker
+  CONTACT_EMAIL: "info@hiredriverjapan.com",                      // destinatario delle richieste: va anche nella variabile del Worker
   TEACHER_NAME: "Fulvio",                      // nome del docente
   // Tariffe aziende, in yen all'ora, IVA esclusa. null = "su preventivo".
   PRICES: {
