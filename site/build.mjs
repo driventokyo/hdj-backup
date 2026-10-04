@@ -29,6 +29,7 @@ function fill(s, l) {
     .replace(/\{\{PRIVACY_DATE\}\}/g, () => { if (!C.PRIVACY_DATE) { missing.add("PRIVACY_DATE"); return `<mark class="ph">${esc(t.datePh || "—")}</mark>`; } const [y, m, d] = C.PRIVACY_DATE.split("-").map(Number); return l === "en" ? new Date(Date.UTC(y, m - 1, d)).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }) : `${y}年${m}月${d}日`; })
     .replace(/\{\{PH:([^}]+)\}\}/g, (_, x) => { missing.add("Placeholder nei testi: " + x); return `<mark class="ph">${x}</mark>`; })
     .replace(/\{\{PRICE:(\w+)\}\}/g, (_, k) => { const p = C.PRICES[k].hourly; if (p == null) { missing.add(`PRICES.${k}.hourly`); return esc(t.onQuote); } return esc(t.fromHour.replace("%", yen(p, l))); })
+    .replace(/\{\{MAXG\}\}/g, () => String(C.MAX_GROUP))
     .replace(/\{\{MIN:(\w+)\}\}/g, (_, k) => String(C.PRICES[k].minHours))
     .replace(/\{\{TPRICE:(\w+)\}\}/g, (_, k) => esc(yen(C.TRAINING_PRICES[k], l)))
     .replace(/\{\{LINK:(\w+)\|([^}]+)\}\}/g, (_, p, x) => `<a href="/${l}/${SLUG[p]}">${x}</a>`);
@@ -109,7 +110,7 @@ function jsonld(page, l, p) {
   if (page === "training") {
     graph.push({ "@type": "Course", name: C.CERT_NAME, description: p.meta, inLanguage: LANG_META[l].html, provider: { "@id": C.SITE_URL + "/#org" },
       hasCourseInstance: { "@type": "CourseInstance", courseMode: "Onsite", courseWorkload: "PT21H", location: { "@type": "Place", name: "Tokyo", address: { "@type": "PostalAddress", addressLocality: "Tokyo", addressCountry: "JP" } } },
-      offers: { "@type": "Offer", category: "Paid", priceCurrency: "JPY", price: C.TRAINING_PRICES.pack6 } });
+      offers: { "@type": "Offer", category: "Paid", priceCurrency: "JPY", price: C.TRAINING_PRICES.full } });
   }
   if (page === "home" || page === "companies") graph.push({ "@type": "Service", name: p.h1.replace(/<[^>]+>/g, ""), serviceType: page === "home" ? "Multilingual professional driver for hire car operators" : "Chauffeur", areaServed: { "@type": "City", name: "Tokyo" }, provider: { "@id": C.SITE_URL + "/#org" }, description: p.meta });
   if (page !== "home") graph.push({ "@type": "BreadcrumbList", itemListElement: [

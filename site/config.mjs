@@ -23,7 +23,9 @@ export const CONFIG = {
     vip:      { hourly: null, minHours: 4 },
   },
   // Formazione: valori del brief, mostrati come "da", IVA esclusa
-  TRAINING_PRICES: { pack6: 600000, extra: 100000, day1: 150000, lang: 40000, renewal: 20000 },
+  // Formazione, IVA esclusa. Pacchetti azienda: sessione privata in sede, fino a 5 persone (MAX_GROUP).
+  TRAINING_PRICES: { day: 10000, course3: 30000, exam: 20000, full: 50000, retake: 10000, lang: 10000, renewal: 20000, pkgIntro: 45000, pkgTrain: 140000, pkgCert: 230000 },
+  MAX_GROUP: 5,
   TURNSTILE_SITEKEY: null,                  // chiave pubblica Cloudflare Turnstile: se null il widget non compare
   GA4_ID: null,                            // es. "G-XXXXXXXXXX": se null lo script di Analytics non viene caricato
   GSC_VERIFICATION: null,                  // codice meta di Search Console, solo se non si verifica via DNS
