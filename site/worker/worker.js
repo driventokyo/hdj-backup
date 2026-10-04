@@ -350,8 +350,103 @@ async function admin(req, env, url) {
     return json({ ok: true, id, token, warning: "Il token si vede solo adesso: consegnarlo alla persona e non salvarlo altrove." });
   }
 
+  // ---- segnalazioni alle aziende partner (provvigione sul fatturato al cliente)
+  const REF_ST = ["sent", "contacted", "booked", "completed", "lost"];
+  const isOp = u.role === "operator" && u.operator_id;
+  if ((m = p.match(/^\/operators\/(OP-[A-Z0-9]{6})$/)) && M === "POST") {
+    if (!isAdmin) return deny();
+    const f = {};
+    if ("fee_rate" in body) { const r = Number(body.fee_rate); if (!(r >= 0 && r <= 0.5)) return json({ ok: false, error: "bad_rate", hint: "Percentuale tra 0 e 50" }, 400); f.fee_rate = r; }
+    for (const k of ["billing_name", "billing_email", "contact_name", "email", "phone", "city", "notes", "status"]) if (k in body) f[k] = str(body[k], k === "notes" ? 2000 : 200);
+    if (!Object.keys(f).length) return json({ ok: false, error: "nothing_to_update" }, 400);
+    await DB.prepare(`UPDATE operators SET ${Object.keys(f).map((k) => k + "=?").join(",")}, updated_at=? WHERE id=?`).bind(...Object.values(f), now(), m[1]).run();
+    return json({ ok: true });
+  }
+  if (p === "/referrals" && M === "GET") {
+    if (!isAdmin && !isOp) return deny();
+    const per = url.searchParams.get("period");
+    const w = [], v = [];
+    if (!isAdmin) { w.push("r.operator_id=?"); v.push(u.operator_id); }
+    if (per && /^\d{4}-\d{2}$/.test(per)) { w.push("(substr(r.completed_at,1,7)=? OR substr(r.created_at,1,7)=?)"); v.push(per, per); }
+    const q = `SELECT r.*, o.name AS operator_name FROM referrals r JOIN operators o ON o.id=r.operator_id ${w.length ? "WHERE " + w.join(" AND ") : ""} ORDER BY r.created_at DESC LIMIT 1000`;
+    const rows = (await DB.prepare(q).bind(...v).all()).results;
+    return json({ ok: true, rows: isAdmin ? rows : rows.map(({ admin_note, ...x }) => x) });
+  }
+  if (p === "/referrals" && M === "POST") {
+    if (!isAdmin) return deny();
+    const op = await DB.prepare(`SELECT id, fee_rate FROM operators WHERE id=? AND status='active'`).bind(str(body.operator_id, 20)).first();
+    if (!op) return json({ ok: false, error: "operator_not_found" }, 404);
+    if (!str(body.client_name)) return json({ ok: false, error: "missing_fields", hint: "Nome del cliente obbligatorio" }, 400);
+    if (!str(body.consent_at, 30)) return json({ ok: false, error: "consent_missing", hint: "Serve la data del consenso del cliente a passare i suoi dati all'azienda (privacy)." }, 400);
+    const id = rid("RF"), t = now();
+    await DB.prepare(`INSERT INTO referrals (id,created_at,updated_at,operator_id,lead_id,client_name,client_company,client_email,client_phone,client_lang,service_date,request,consent_at,fee_rate,admin_note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(id, t, t, op.id, str(body.lead_id, 20), str(body.client_name), str(body.client_company), str(body.client_email), str(body.client_phone, 40), str(body.client_lang, 10), str(body.service_date, 60), str(body.request, 2000), str(body.consent_at, 30), op.fee_rate, str(body.admin_note, 2000)).run();
+    return json({ ok: true, id });
+  }
+  if ((m = p.match(/^\/referrals\/(RF-[A-Z0-9]{6})$/)) && M === "POST") {
+    const r = await DB.prepare(`SELECT * FROM referrals WHERE id=?`).bind(m[1]).first();
+    if (!r) return json({ ok: false, error: "not_found" }, 404);
+    if (!isAdmin && !(isOp && r.operator_id === u.operator_id)) return deny();
+    if (r.statement_id && !isAdmin) return json({ ok: false, error: "locked", hint: "請求書に含まれた案件は変更できません。" }, 409);
+    if (r.statement_id && ("revenue_jpy" in body || "completed_at" in body || "status" in body)) return json({ ok: false, error: "locked", hint: "Segnalazione gia' in un estratto conto: annulla l'estratto prima di cambiare importi o date." }, 409);
+    const f = {};
+    if ("status" in body) { if (!REF_ST.includes(body.status)) return json({ ok: false, error: "bad_status" }, 400); f.status = body.status; }
+    if ("completed_at" in body) { const d = str(body.completed_at, 10); if (d && !/^\d{4}-\d{2}-\d{2}$/.test(d)) return json({ ok: false, error: "bad_date" }, 400); f.completed_at = d; }
+    if ("revenue_jpy" in body) f.revenue_jpy = body.revenue_jpy === "" || body.revenue_jpy == null ? null : int(body.revenue_jpy, 0, 1e9);
+    if ("operator_note" in body) f.operator_note = str(body.operator_note, 2000);
+    if (isAdmin && "admin_note" in body) f.admin_note = str(body.admin_note, 2000);
+    if (isAdmin) for (const k of ["client_name", "client_company", "client_email", "client_phone", "service_date", "request"]) if (k in body) f[k] = str(body[k], k === "request" ? 2000 : 200);
+    const merged = { ...r, ...f };
+    if (merged.status === "completed" && (merged.revenue_jpy == null || !merged.completed_at)) return json({ ok: false, error: "completion_incomplete", hint: isAdmin ? "Per chiudere servono importo fatturato e data del servizio." : "完了にするには、ご請求額（税抜）とご利用日を入力してください。" }, 400);
+    f.fee_jpy = merged.revenue_jpy == null ? null : Math.floor(merged.revenue_jpy * merged.fee_rate);
+    await DB.prepare(`UPDATE referrals SET ${Object.keys(f).map((k) => k + "=?").join(",")}, updated_at=? WHERE id=?`).bind(...Object.values(f), now(), m[1]).run();
+    return json({ ok: true, fee_jpy: f.fee_jpy });
+  }
+  if (p === "/statements" && M === "GET") {
+    if (!isAdmin && !isOp) return deny();
+    const q = `SELECT s.*, o.name AS operator_name FROM statements s JOIN operators o ON o.id=s.operator_id ${isAdmin ? "" : "WHERE s.operator_id=? AND s.status!='void'"} ORDER BY s.period DESC, o.name`;
+    return json({ ok: true, rows: (await (isAdmin ? DB.prepare(q) : DB.prepare(q).bind(u.operator_id)).all()).results });
+  }
+  if (p === "/statements/generate" && M === "POST") {
+    if (!isAdmin) return deny();
+    const per = str(body.period, 7); if (!per || !/^\d{4}-\d{2}$/.test(per)) return json({ ok: false, error: "bad_period" }, 400);
+    const groups = (await DB.prepare(`SELECT operator_id, COUNT(*) AS n, SUM(revenue_jpy) AS rev, SUM(fee_jpy) AS fee FROM referrals WHERE status='completed' AND statement_id IS NULL AND substr(completed_at,1,7)=? GROUP BY operator_id`).bind(per).all()).results;
+    const made = [], skipped = [];
+    const [y, mo] = per.split("-").map(Number);
+    const issued = now().slice(0, 10);
+    const due = new Date(Date.UTC(y, mo + 1, 0)).toISOString().slice(0, 10); // fine del mese successivo
+    for (const g of groups) {
+      const ex = await DB.prepare(`SELECT id FROM statements WHERE operator_id=? AND period=? AND status!='void'`).bind(g.operator_id, per).first();
+      if (ex) { skipped.push(ex.id); continue; }
+      const n = await DB.prepare(`SELECT COUNT(*) AS n FROM statements WHERE id LIKE ?`).bind(`HDJ-${per.replace("-", "")}-%`).first();
+      const id = `HDJ-${per.replace("-", "")}-${String((n.n || 0) + 1).padStart(3, "0")}`;
+      const tax = Math.floor(g.fee * 0.10), t = now();
+      await DB.batch([
+        DB.prepare(`INSERT INTO statements (id,created_at,updated_at,operator_id,period,items,revenue_jpy,fee_jpy,tax_jpy,total_jpy,issued_at,due_date) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`).bind(id, t, t, g.operator_id, per, g.n, g.rev, g.fee, tax, g.fee + tax, issued, due),
+        DB.prepare(`UPDATE referrals SET statement_id=?, updated_at=? WHERE operator_id=? AND status='completed' AND statement_id IS NULL AND substr(completed_at,1,7)=?`).bind(id, t, g.operator_id, per),
+      ]);
+      made.push(id);
+    }
+    return json({ ok: true, made, skipped });
+  }
+  if ((m = p.match(/^\/statements\/(HDJ-\d{6}-\d{3})$/)) && M === "POST") {
+    if (!isAdmin) return deny();
+    const st = body.status; if (!["sent", "paid", "void", "issued"].includes(st)) return json({ ok: false, error: "bad_status" }, 400);
+    const t = now(), stmts = [DB.prepare(`UPDATE statements SET status=?, ${st === "sent" ? "sent_at=?," : st === "paid" ? "paid_at=?," : ""} updated_at=? WHERE id=?`).bind(...(st === "sent" || st === "paid" ? [st, t, t, m[1]] : [st, t, m[1]]))];
+    if (st === "void") stmts.push(DB.prepare(`UPDATE referrals SET statement_id=NULL, updated_at=? WHERE statement_id=?`).bind(t, m[1])); // le segnalazioni tornano libere
+    await DB.batch(stmts);
+    return json({ ok: true });
+  }
+  if ((m = p.match(/^\/statements\/(HDJ-\d{6}-\d{3})\/invoice$/)) && M === "GET") {
+    const s = await DB.prepare(`SELECT s.*, o.name, o.billing_name FROM statements s JOIN operators o ON o.id=s.operator_id WHERE s.id=?`).bind(m[1]).first();
+    if (!s) return json({ ok: false, error: "not_found" }, 404);
+    if (!isAdmin && !(isOp && s.operator_id === u.operator_id)) return deny();
+    const items = (await DB.prepare(`SELECT id, client_company, client_name, completed_at, revenue_jpy, fee_rate, fee_jpy FROM referrals WHERE statement_id=? ORDER BY completed_at`).bind(m[1]).all()).results;
+    return new Response(invoiceHtml(s, items, env), { headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" } });
+  }
+
   // export CSV
-  if ((m = p.match(/^\/export\/(leads_service|leads_training|driver_applications|operators|drivers|courses|enrollments|certificates|renewals)\.csv$/)) && M === "GET") {
+  if ((m = p.match(/^\/export\/(leads_service|leads_training|driver_applications|operators|drivers|courses|enrollments|certificates|renewals|referrals|statements)\.csv$/)) && M === "GET") {
     if (!isAdmin) return deny();
     const r = (await DB.prepare(`SELECT * FROM ${m[1]} ORDER BY created_at`).all()).results;
     const cols = r.length ? Object.keys(r[0]).filter((c) => c !== "verify_token" && c !== "token_hash" && c !== "ip_hash") : [];
@@ -360,6 +455,32 @@ async function admin(req, env, url) {
     return new Response(csv, { headers: { "content-type": "text/csv; charset=utf-8", "content-disposition": `attachment; filename="${m[1]}-${now().slice(0, 10)}.csv"`, "cache-control": "no-store" } });
   }
   return json({ ok: false, error: "not_found" }, 404);
+}
+
+// ---------------------------------------------------------------- fattura provvigioni (適格請求書)
+function invoiceHtml(s, items, env) {
+  const yen = (n) => "¥" + Number(n || 0).toLocaleString("ja-JP");
+  const ph = (v, label) => v ? esc(v).replace(/\n/g, "<br>") : `<span class="ph">${label}</span>`;
+  const [y, mo] = s.period.split("-");
+  const rows = items.map((r) => `<tr><td>${esc(r.completed_at)}</td><td>${esc(r.client_company || r.client_name)}<br><small>${esc(r.id)}</small></td><td class="n">${yen(r.revenue_jpy)}</td><td class="n">${Math.round(r.fee_rate * 100)}%</td><td class="n">${yen(r.fee_jpy)}</td></tr>`).join("");
+  return `<!doctype html><html lang="ja"><head><meta charset="utf-8"><title>請求書 ${esc(s.id)}</title><style>
+@page{size:A4;margin:16mm}body{font:12px/1.6 "Hiragino Sans","Noto Sans JP",system-ui,sans-serif;color:#14110E;margin:0}
+.w{max-width:180mm;margin:0 auto;padding:8mm 0}h1{font-size:22px;letter-spacing:.3em;text-align:center;margin:0 0 8mm}
+.top{display:flex;justify-content:space-between;gap:10mm}.to{font-size:15px;border-bottom:1px solid #14110E;padding-bottom:2mm;min-width:80mm}
+.from{text-align:right;font-size:11px}.brand{font-weight:700;color:#8a6a2f;letter-spacing:.04em}.tot{margin:8mm 0 6mm;font-size:16px;border:1px solid #14110E;padding:3mm 4mm;display:flex;justify-content:space-between}
+table{width:100%;border-collapse:collapse;margin:4mm 0}th,td{border-bottom:1px solid #ccc;padding:2mm;text-align:left;vertical-align:top}th{background:#f3efe6;font-size:11px}.n{text-align:right;white-space:nowrap}
+.sum td{border:0;padding:1mm 2mm}.sum .n{min-width:35mm}.note{font-size:10.5px;color:#444;margin-top:6mm}.ph{background:#fff2c6;padding:0 3px}small{color:#666}
+@media print{.noprint{display:none}}</style></head><body><div class="w">
+<p class="noprint" style="text-align:right"><button onclick="print()">印刷・PDF保存</button></p>
+<h1>請求書</h1>
+<div class="top"><div><div class="to">${ph(s.billing_name || s.name, "宛名")} 御中</div><p>件名：送客紹介料（${esc(y)}年${Number(mo)}月分）</p></div>
+<div class="from"><div>請求番号：${esc(s.id)}</div><div>発行日：${esc(s.issued_at)}</div><p><span class="brand">HIRE driver japan</span><br>${ph(env.INVOICE_ISSUER, "発行事業者名")}<br>${ph(env.INVOICE_ADDRESS, "住所")}<br>登録番号：${ph(env.INVOICE_REG_NO, "T+13桁")}</p></div></div>
+<div class="tot"><span>ご請求金額（税込）</span><b>${yen(s.total_jpy)}</b></div>
+<table><tr><th>ご利用日</th><th>お客さま・案件番号</th><th class="n">ご利用額（税抜）</th><th class="n">料率</th><th class="n">紹介料</th></tr>${rows}</table>
+<table class="sum"><tr><td></td><td class="n">紹介料 小計（10%対象）</td><td class="n">${yen(s.fee_jpy)}</td></tr><tr><td></td><td class="n">消費税（10%）</td><td class="n">${yen(s.tax_jpy)}</td></tr><tr><td></td><td class="n"><b>合計</b></td><td class="n"><b>${yen(s.total_jpy)}</b></td></tr></table>
+<p>お支払期限：${esc(s.due_date)}<br>お振込先：${ph(env.INVOICE_BANK, "銀行名・支店・口座種別・口座番号・口座名義")}<br><small>振込手数料はご負担ください。</small></p>
+<p class="note">本請求は、提携契約にもとづく送客紹介料です。紹介料は、ご紹介したお客さまへの御社のご請求額（税抜）に料率を乗じて算出しています。運送契約と運賃のお支払いは、御社とお客さまの間で行われたものです。</p>
+</div></body></html>`;
 }
 
 // ---------------------------------------------------------------- cron giornaliero

@@ -31,7 +31,7 @@ td input[type=number]{width:70px}
 </style>
 </head>
 <body>
-<header><b>HIRE</b> driver japan · pannello<nav id="tabs"></nav><span id="who"></span></header>
+<header><b>HIRE</b> driver japan · <span id="ptitle">pannello / 管理画面</span><nav id="tabs"></nav><span id="who"></span></header>
 <main id="app"></main>
 <dialog id="dlg"><div class="in" id="dlgin"></div></dialog>
 <div class="msg" id="msg"></div>
@@ -49,21 +49,22 @@ const langs=j=>{try{return JSON.parse(j||"[]").map(x=>L[x]||x).join(", ")}catch(
 const d10=s=>(s||"").slice(0,10);
 
 function login(){$("#tabs").innerHTML="";$("#who").textContent="";
-  app.innerHTML=`<form class="login" id="lf"><h2>Accesso</h2><p>Incolla il token che ti e' stato consegnato.</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra</button></p></form>`;
+  app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
 
-const TABS_ADMIN=[["leads","Richieste"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
+const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
 const TABS_TEACHER=[["courses","Le mie sessioni"]];
-const TABS_OPERATOR=[["certs","Certificati dei miei autisti"]];
+const TABS_OPERATOR=[["refs","紹介案件"],["stmts","請求書"],["certs","乗務員の認証"]];
 async function start(){
   const tabs=ME.role==="admin"?TABS_ADMIN:ME.role==="teacher"?TABS_TEACHER:TABS_OPERATOR;
-  $("#who").innerHTML=`${esc(ME.name)} · ${esc(ME.role)} · <a href="#" id="lo" style="color:#9aa6b1">esci</a>`;$("#lo").onclick=e=>{e.preventDefault();logout()};
+  $("#ptitle").textContent=ME.role==="operator"?"提携事業者さま専用画面":"pannello";
+  $("#who").innerHTML=ME.role==="operator"?`${esc(ME.name)} · <a href="#" id="lo" style="color:#9aa6b1">ログアウト</a>`:`${esc(ME.name)} · ${esc(ME.role)} · <a href="#" id="lo" style="color:#9aa6b1">esci</a>`;$("#lo").onclick=e=>{e.preventDefault();logout()};
   $("#tabs").innerHTML=tabs.map(([k,t])=>`<button data-t="${k}">${t}<span class="cnt" id="c-${k}" hidden></span></button>`).join("");
   $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.t)};
   show(tabs[0][0]);counts();setInterval(counts,60000);
 }
 async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}document.title=(n?`(${n}) `:"")+"Pannello · HIRE driver japan"}catch(_){}}
-function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
+function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
 
 // ---- Richieste: pipeline
 let leadKind="service";
@@ -82,9 +83,10 @@ function leadDlg(r){
   <div class="row"><label>Stato<select id="ds">${STAGES[leadKind].map(s=>`<option value="${s}"${s===r.stage?" selected":""}>${SLAB[s]}</option>`).join("")}</select></label>
   ${leadKind!=="driver"?`<label>Preventivo (yen, IVA esclusa)<input id="dq" type="number" value="${r.quote_jpy??""}"></label><label>Motivo perdita<input id="dl" value="${esc(r.lost_reason||"")}"></label>`:""}</div>
   <label style="font-size:12px;color:#5b6875">Note interne<textarea id="dn" rows="3">${esc(r.notes||"")}</textarea></label>
-  <p class="row"><button class="b" id="dsave">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${leadKind==="driver"&&r.stage==="hired"&&!r.driver_id?`<button class="b s" id="mkdrv">Crea scheda autista</button>`:""}</p>`;
+  <p class="row"><button class="b" id="dsave">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${leadKind==="service"?`<button class="b s" id="mkref">Segnala a un'azienda</button>`:""}${leadKind==="driver"&&r.stage==="hired"&&!r.driver_id?`<button class="b s" id="mkdrv">Crea scheda autista</button>`:""}</p>`;
   dlg.showModal();
   $("#dsave").onclick=async()=>{const b={stage:$("#ds").value,notes:$("#dn").value};if(leadKind!=="driver"){b.quote_jpy=$("#dq").value;b.lost_reason=$("#dl").value}await api(`/leads/${leadKind}/${r.id}`,b);dlg.close();toast("Salvato");leads();counts()};
+  const rf=$("#mkref");if(rf)rf.onclick=()=>{dlg.close();PREF={lead_id:r.id,client_name:r.contact_name,client_company:r.company,client_email:r.email,client_phone:r.phone,client_lang:r.site_lang,service_date:r.service_date,request:[r.plan,r.hours?r.hours+"h":"",r.vehicle,r.city,r.message].filter(Boolean).join(" · ")};show("refs")};
   const mk=$("#mkdrv");if(mk)mk.onclick=async()=>{const j=await api("/drivers",{full_name:r.full_name,email:r.email,phone:r.phone,languages:JSON.parse(r.languages||"[]"),nishu_menkyo:r.license==="nishu"?1:0,employed_by_us:1});toast("Autista creato: "+j.id);dlg.close()};
 }
 const dlg=$("#dlg");
@@ -95,8 +97,9 @@ async function loadPeople(){OPS=ME.role==="admin"?(await api("/operators")).rows
 async function people(){await loadPeople();
   app.innerHTML=`<div class="panel"><h3>Nuovo operatore</h3><div class="row"><label>Ragione sociale<input id="on"></label><label>Tipo<select id="ot"><option value="hire">hire</option><option value="taxi">taxi</option><option value="yakuin">yakuin sougei</option><option value="hotel">hotel</option><option value="dmc">DMC</option><option value="company">azienda (servizio autisti)</option><option value="other">altro</option></select></label><label>Citta<input id="oc"></label><label>Referente<input id="ocn"></label><label>Email<input id="oe"></label><label>Lingua<select id="ol"><option>ja</option><option>zh</option><option>en</option></select></label><button class="b" id="osave">Aggiungi</button></div></div>
   <div class="panel"><h3>Nuovo autista</h3><div class="row"><label>Nome completo<input id="dn2"></label><label>Nome in alfabeto latino<input id="dnl"></label><label>Operatore<select id="dop"><option value="">nessuno (nostro dipendente)</option>${OPS.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select></label><label>Lingue (en,zh,it,fr,es)<input id="dlg2" placeholder="en,zh"></label><label>Mostra sul certificato<select id="ddm"><option value="initials">solo iniziali</option><option value="full">nome completo</option></select></label><label>Mostra operatore<select id="dso"><option value="0">no</option><option value="1">si</option></select></label><label>Data consenso scritto<input id="dca" type="date"></label><label>Nishu menkyo<select id="dnm"><option value="1">si</option><option value="0">in corso</option></select></label><button class="b" id="dsave2">Aggiungi</button></div></div>
-  <h3>Operatori</h3><table><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Citta</th><th>Referente</th><th>Email</th></tr>${OPS.map(o=>`<tr><td>${o.id}</td><td>${esc(o.name)}</td><td>${o.type}</td><td>${esc(o.city)}</td><td>${esc(o.contact_name)}</td><td>${esc(o.email)}</td></tr>`).join("")}</table>
+  <h3>Operatori</h3><table><tr><th>ID</th><th>Nome</th><th>Tipo</th><th>Citta</th><th>Referente</th><th>Email</th><th>Provvigione %</th><th>Intestazione fattura</th><th>Email fatture</th><th></th></tr>${OPS.map(o=>`<tr data-op="${o.id}"><td>${o.id}</td><td>${esc(o.name)}</td><td>${o.type}</td><td>${esc(o.city)}</td><td>${esc(o.contact_name)}</td><td>${esc(o.email)}</td><td><input type="number" step="0.5" min="0" max="50" data-o="fee" value="${Math.round((o.fee_rate??0.1)*1000)/10}"></td><td><input data-o="billing_name" value="${esc(o.billing_name||"")}" placeholder="株式会社○○"></td><td><input data-o="billing_email" value="${esc(o.billing_email||"")}"></td><td><button class="b s" data-osv>Salva</button></td></tr>`).join("")}</table>
   <h3>Autisti</h3><table><tr><th>ID</th><th>Nome</th><th>Operatore</th><th>Lingue</th><th>Nishu</th><th>Visibilita</th><th>Consenso</th></tr>${DRV.map(d=>`<tr><td>${d.id}</td><td>${esc(d.full_name)}<br><small>${esc(d.name_latin||"")}</small></td><td>${esc(d.operator_name||(d.employed_by_us?"nostro dipendente":""))}</td><td>${langs(d.languages)}</td><td>${d.nishu_menkyo?"si":"in corso"}</td><td>${d.display_mode==="full"?"nome":"iniziali"}${d.show_operator?" + operatore":""}</td><td>${d10(d.consent_at)||'<span class="tag revoked">manca</span>'}</td></tr>`).join("")}</table>`;
+  app.querySelectorAll("[data-osv]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr");await api("/operators/"+tr.dataset.op,{fee_rate:Number(tr.querySelector('[data-o="fee"]').value)/100,billing_name:tr.querySelector('[data-o="billing_name"]').value,billing_email:tr.querySelector('[data-o="billing_email"]').value});toast("Operatore aggiornato")});
   $("#osave").onclick=async()=>{await api("/operators",{name:$("#on").value,type:$("#ot").value,city:$("#oc").value,contact_name:$("#ocn").value,email:$("#oe").value,lang:$("#ol").value});toast("Operatore aggiunto");people()};
   $("#dsave2").onclick=async()=>{const op=$("#dop").value;await api("/drivers",{full_name:$("#dn2").value,name_latin:$("#dnl").value,operator_id:op||null,employed_by_us:op?0:1,languages:$("#dlg2").value.split(",").map(s=>s.trim()).filter(Boolean),display_mode:$("#ddm").value,show_operator:$("#dso").value==="1",consent_at:$("#dca").value||null,nishu_menkyo:$("#dnm").value});toast("Autista aggiunto");people()};
 }
@@ -174,8 +177,48 @@ async function users(){await loadPeople();const rows=(await api("/users")).rows;
   $("#usave").onclick=async()=>{const j=await api("/users",{name:$("#un").value,email:$("#ue").value,role:$("#ur").value,operator_id:$("#uo").value||null});$("#dlgin").innerHTML=`<h3>Token per ${esc($("#un").value)}</h3><p>${esc(j.warning)}</p><pre>${esc(j.token)}</pre><button class="b" onclick="dlg.close()">Fatto</button>`;dlg.showModal();users()};
 }
 
+// ---- Segnalazioni alle aziende partner (admin in italiano, azienda in giapponese)
+let PREF=null;
+const yen=n=>n==null||n===""?"":"¥"+Number(n).toLocaleString("ja-JP");
+const RST={sent:["Inviata","紹介済み"],contacted:["Contattata","連絡済み"],booked:["Prenotata","予約確定"],completed:["Conclusa","完了"],lost:["Persa","不成立"]};
+const isOpUI=()=>ME.role==="operator";
+const rl=k=>RST[k]?RST[k][isOpUI()?1:0]:k;
+async function refs(){
+  if(!isOpUI())await loadPeople();
+  const rows=(await api("/referrals")).rows;
+  const f=PREF||{};PREF=null;
+  const form=isOpUI()?`<p style="color:#5b6875">HIRE driver japanからご紹介したお客さまです。お見積り、ご契約、運賃のお受け取りは御社とお客さまの間で行ってください。ご利用が完了したら「完了」にして、ご請求額（税抜）とご利用日を入力してください。月末に紹介料をまとめてご請求します。</p>`:
+  `<div class="panel"><h3>Nuova segnalazione</h3><p style="color:#5b6875;margin-top:0">Presenti soltanto il cliente: niente preventivi, prezzi o incassi da parte nostra. Preventivo, contratto e pagamento sono tra l'azienda e il cliente.</p>
+  <div class="row"><label>Azienda partner<select id="ro">${OPS.filter(o=>o.status!=="inactive").map(o=>`<option value="${o.id}">${esc(o.name)} (${Math.round((o.fee_rate??0.1)*100)}%)</option>`).join("")}</select></label><label>Cliente (nome)<input id="rn" value="${esc(f.client_name||"")}"></label><label>Società cliente<input id="rc" value="${esc(f.client_company||"")}"></label><label>Email<input id="re" value="${esc(f.client_email||"")}"></label><label>Telefono<input id="rp" value="${esc(f.client_phone||"")}"></label><label>Lingua<input id="rlg" value="${esc(f.client_lang||"")}"></label><label>Data/periodo richiesto<input id="rd" value="${esc(f.service_date||"")}"></label></div>
+  <label style="font-size:12px;color:#5b6875">Cosa chiede il cliente (senza prezzi)<textarea id="rq" rows="2">${esc(f.request||"")}</textarea></label>
+  <div class="row"><label>Data del consenso del cliente a passare i dati<input id="rcs" type="date"></label><label>Nota interna<input id="rn2"></label><button class="b" id="rsave">Segnala</button></div><input type="hidden" id="rlead" value="${esc(f.lead_id||"")}"></div>`;
+  const H=isOpUI()?["番号","受付日","お客さま","ご連絡先","ご希望","状況","ご利用日","ご請求額（税抜）","紹介料","メモ",""]:["N.","Data","Azienda","Cliente","Contatti","Richiesta","Stato","Servizio","Fatturato (IVA escl.)","Provvigione","Estratto",""];
+  app.innerHTML=form+`<table id="rt"><tr>${H.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>{const lock=!!r.statement_id;
+    const stSel=`<select data-f="status"${lock?" disabled":""}>${Object.keys(RST).map(k=>`<option value="${k}"${k===r.status?" selected":""}>${rl(k)}</option>`).join("")}</select>`;
+    const done=`<input type="date" data-f="completed_at" value="${esc(r.completed_at||"")}"${lock?" disabled":""}>`;
+    const rev=`<input type="number" min="0" data-f="revenue_jpy" value="${r.revenue_jpy??""}" style="width:110px"${lock?" disabled":""}>`;
+    const note=`<input data-f="${isOpUI()?"operator_note":"admin_note"}" value="${esc(isOpUI()?r.operator_note||"":r.admin_note||"")}">`;
+    const contact=[r.client_email,r.client_phone,r.client_lang].filter(Boolean).map(esc).join("<br>");
+    return isOpUI()?`<tr data-id="${r.id}"><td>${r.id}</td><td>${d10(r.created_at)}</td><td>${esc(r.client_company||"")}<br>${esc(r.client_name)}</td><td>${contact}</td><td>${esc(r.service_date||"")}<br><small>${esc(r.request||"")}</small></td><td>${stSel}</td><td>${done}</td><td>${rev}</td><td>${yen(r.fee_jpy)}</td><td>${note}</td><td>${lock?`<small>${esc(r.statement_id)}</small>`:`<button class="b s" data-sv>保存</button>`}</td></tr>`
+    :`<tr data-id="${r.id}"><td>${r.id}</td><td>${d10(r.created_at)}</td><td>${esc(r.operator_name)}</td><td>${esc(r.client_company||"")}<br>${esc(r.client_name)}</td><td>${contact}</td><td>${esc(r.service_date||"")}<br><small>${esc(r.request||"")}</small>${r.operator_note?`<br><small>Nota azienda: ${esc(r.operator_note)}</small>`:""}</td><td>${stSel}</td><td>${done}</td><td>${rev}</td><td>${yen(r.fee_jpy)} <small>${Math.round(r.fee_rate*100)}%</small></td><td>${esc(r.statement_id||"")}</td><td>${note} <button class="b s" data-sv>Salva</button></td></tr>`}).join("")||`<tr><td colspan="12">${isOpUI()?"ご紹介した案件はまだありません。":"Nessuna segnalazione."}</td></tr>`}</table>`;
+  const rs=$("#rsave");if(rs)rs.onclick=async()=>{const j=await api("/referrals",{operator_id:$("#ro").value,lead_id:$("#rlead").value||null,client_name:$("#rn").value,client_company:$("#rc").value,client_email:$("#re").value,client_phone:$("#rp").value,client_lang:$("#rlg").value,service_date:$("#rd").value,request:$("#rq").value,consent_at:$("#rcs").value,admin_note:$("#rn2").value});toast("Segnalazione "+j.id+" creata. Avvisa l'azienda: la vede nel suo pannello.");refs()};
+  app.querySelectorAll("[data-sv]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr"),o={};tr.querySelectorAll("[data-f]").forEach(i=>{if(!i.disabled)o[i.dataset.f]=i.value});const j=await api("/referrals/"+tr.dataset.id,o);toast((isOpUI()?"保存しました":"Salvato")+(j.fee_jpy!=null?" · "+yen(j.fee_jpy):""));refs()});
+}
+async function openInvoice(id){const r=await fetch(`/api/admin/statements/${id}/invoice`,{headers:{"x-panel-token":TOKEN}});if(!r.ok){toast("Errore");return}const h=await r.text();const w=window.open("","_blank");if(!w){toast("Consenti i popup");return}w.document.write(h);w.document.close()}
+async function stmts(){
+  const rows=(await api("/statements")).rows;
+  const SS={issued:["Emesso","発行済み"],sent:["Inviato","送付済み"],paid:["Pagato","入金確認済み"],void:["Annullato","取消"]};
+  const sl=k=>SS[k]?SS[k][isOpUI()?1:0]:k;
+  const prev=(()=>{const d=new Date();d.setMonth(d.getMonth()-1);return d.toISOString().slice(0,7)})();
+  app.innerHTML=(isOpUI()?"":`<div class="panel"><h3>Genera gli estratti del mese</h3><p style="color:#5b6875;margin-top:0">Raccoglie per ogni azienda le segnalazioni "Concluse" con data del servizio nel mese e non ancora fatturate. Provvigione + IVA 10%. Scadenza: fine del mese successivo.</p><div class="row"><label>Mese<input id="sp" type="month" value="${prev}"></label><button class="b" id="sgen">Genera</button></div></div>`)+
+  `<table><tr>${(isOpUI()?["請求番号","対象月","件数","ご利用額（税抜）","紹介料","消費税","合計","お支払期限","状況",""]:["N.","Mese","Azienda","Segnalazioni","Fatturato clienti","Provvigione","IVA","Totale","Scadenza","Stato",""]).map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(s=>`<tr><td>${s.id}</td><td>${s.period}</td>${isOpUI()?"":`<td>${esc(s.operator_name)}</td>`}<td>${s.items}</td><td>${yen(s.revenue_jpy)}</td><td>${yen(s.fee_jpy)}</td><td>${yen(s.tax_jpy)}</td><td><b>${yen(s.total_jpy)}</b></td><td>${s.due_date}</td><td><span class="tag ${s.status==="paid"?"active":s.status==="void"?"revoked":""}">${sl(s.status)}</span></td><td><button class="b s" data-inv="${s.id}">${isOpUI()?"請求書":"Fattura"}</button>${isOpUI()||s.status==="void"?"":` <button class="b s" data-st="sent" data-id="${s.id}">Inviato</button> <button class="b s" data-st="paid" data-id="${s.id}">Pagato</button> <button class="b r" data-st="void" data-id="${s.id}">Annulla</button>`}</td></tr>`).join("")||`<tr><td colspan="11">${isOpUI()?"請求書はまだありません。":"Nessun estratto."}</td></tr>`}</table>`;
+  const g=$("#sgen");if(g)g.onclick=async()=>{const j=await api("/statements/generate",{period:$("#sp").value});toast(j.made.length?`Creati: ${j.made.join(", ")}`:"Niente da fatturare per quel mese"+(j.skipped.length?` (gia' esistenti: ${j.skipped.join(", ")})`:""));stmts()};
+  app.querySelectorAll("[data-inv]").forEach(b=>b.onclick=()=>openInvoice(b.dataset.inv));
+  app.querySelectorAll("[data-st]").forEach(b=>b.onclick=async()=>{if(b.dataset.st==="void"&&!confirm("Annullare l'estratto? Le segnalazioni tornano modificabili."))return;await api("/statements/"+b.dataset.id,{status:b.dataset.st});toast("Aggiornato");stmts()});
+}
+
 // ---- Export
-function exportTab(){const T=["leads_service","leads_training","driver_applications","operators","drivers","courses","enrollments","certificates","renewals"];
+function exportTab(){const T=["leads_service","leads_training","driver_applications","operators","drivers","courses","enrollments","certificates","renewals","referrals","statements"];
   app.innerHTML=`<h3>Export CSV</h3><p>${T.map(t=>`<button class="b s" data-x="${t}" style="margin:4px">${t}</button>`).join("")}</p>`;
   app.querySelectorAll("[data-x]").forEach(b=>b.onclick=async()=>{const r=await fetch(`/api/admin/export/${b.dataset.x}.csv`,{headers:{"x-panel-token":TOKEN}});if(!r.ok){toast("Errore export");return}const bl=await r.blob();const a=document.createElement("a");a.href=URL.createObjectURL(bl);a.download=`${b.dataset.x}.csv`;a.click()})}
 

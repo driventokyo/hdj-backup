@@ -8,3 +8,4 @@ site/dev.log
 seo/collect.out
 seo/*.out
 .DS_Store
+backups/

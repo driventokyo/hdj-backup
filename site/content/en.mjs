@@ -61,7 +61,7 @@ export default {
           { q: "How is the hourly wage set?", a: "We agree it with you based on hours, languages and the kind of bookings." },
           { q: "Can he drive on days without foreign clients?", a: "Yes. Working days are agreed each month and he drives whatever bookings you have that day." },
           { q: "Can we book the training only?", a: "Yes. You can book training and certification for your own drivers on its own." },
-          { q: "Do referrals carry a fee?", a: "Referral terms are agreed case by case with each partner." },
+          { q: "Do referrals carry a fee?", a: "Yes. We receive a referral fee on bookings from clients we introduce. The rate and terms are set in the partner agreement. Clients pay nothing extra." },
         ] },
         { type: "form", id: "form", form: "operator", h2: "Talk to us", intro: "Tell us what interests you. We will reply within two business days.", submit: "Send" },
       ],

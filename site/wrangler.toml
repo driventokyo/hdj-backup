@@ -26,7 +26,12 @@ SITE_URL = "https://hiredriverjapan.com"
 BRAND_NAME = "HIRE driver japan"
 CERT_NAME = "VVIP Service Certificate"
 CONTACT_EMAIL = ""      # destinatario delle richieste: da definire
-FROM_EMAIL = ""         # mittente Resend su dominio verificato, es. "Hire Driver Japan <info@hiredriverjapan.com>"
+FROM_EMAIL = ""         # mittente su dominio verificato, es. "HIRE driver japan <info@hiredriverjapan.com>"
+# Fattura provvigioni (適格請求書): emittente legale, indirizzo, numero di registrazione T+13 cifre, coordinate bancarie
+INVOICE_ISSUER = "6株式会社"
+INVOICE_ADDRESS = ""
+INVOICE_REG_NO = ""
+INVOICE_BANK = ""
 
 # Segreti (wrangler secret put): ADMIN_TOKEN, RESEND_API_KEY, TURNSTILE_SECRET
 [triggers]
