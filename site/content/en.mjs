@@ -1,7 +1,7 @@
 // English version: corporate clients, foreign companies in Japan, hotels, DMCs and overseas agencies.
 export default {
   ui: {
-    repPh: "Representative (to be published)", emailPh: "Contact email (coming soon)", datePh: "Date (set on publication)", skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
+    tokushohoLink: "Legal notice", blogLink: "Blog", blogIndexTitle: "Blog: hire car drivers and executive drivers in Japan", blogIndexMeta: "Articles for hire and taxi operators and corporate staff: the Class 2 licence, executive driver rates, serving foreign VIPs.", readMore: "Read more", posted: "Published", repPh: "Representative (to be published)", emailPh: "Contact email (coming soon)", datePh: "Date (set on publication)", skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
     privacyLink: "Privacy notice", operatedBy: "Operated by", verifyNav: "Verify a certificate", onQuote: "On request", fromHour: "From % per hour (excl. tax)",
     teacherPh: "Trainer name (to be published)", photoPh: "Trainer photo (coming soon)", addressPh: "Registered address (coming soon)",
     certNo: "Certificate number", verifyBtn: "Verify", verifyHint: "Certificate numbers look like 2026-0001. You can also scan the QR code the driver shows you.", scanBtn: "Scan a QR code",
@@ -31,8 +31,8 @@ export default {
   },
   pages: {
     home: {
-      title: "Multilingual Class 2 Driver for Hire and Taxi Operators in Japan | {{BRAND}}",
-      meta: "For hire and taxi operators in Japan: a driver with a Class 2 licence who speaks Japanese, English, Italian, French and Spanish joins your team part-time to handle foreign VIP bookings. Plus VIP service training and certification for your drivers.",
+      title: "Multilingual Class 2 Driver for Hire Operators | {{BRAND}}",
+      meta: "For hire and taxi operators in Japan: a Class 2 driver who speaks Japanese, English, Italian, French and Spanish joins your team part-time for foreign VIP bookings. Training and certification too.",
       h1: "Never turn down a foreign VIP booking again.",
       hero: { kicker: "For hire and taxi operators, Tokyo", sub: "{{TEACHER}} holds a Japanese Class 2 licence and serves guests in five languages. He joins your company as a part-time driver for your foreign clients.", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "Driver {{TEACHER}}", cap: "Illustrative photo. He drives your company's vehicles." }, ctas: [{ label: "Book me now", href: "#book", book: true }, { label: "See training and certification", href: "training" }] },
       blocks: [
@@ -42,6 +42,10 @@ export default {
           { tag: "Available", h3: "Driver training and certification", p: "A three-day course in VIP protocol and service language for your drivers. Those who pass receive {{CERT}}.", foot: "{{LINK:training|Training details}}" },
           { tag: "Available", h3: "Client referrals", p: "We refer clients who need a car and a driver to licensed partner operators. The transport contract is between you and the client." },
         ] },
+        { type: "figures", id: "certificates", h2: "VVIP Service Certificate: proof of your drivers' standard", intro: "Awarded to drivers who complete the training and pass all three exams. Hotels and overseas agencies can verify any certificate at any time by its number or QR code.", items: [
+          { src: "/assets/cert-vvip-1100.webp", w: 1100, h: 777, alt: "VVIP Service Certificate diploma", h3: "VVIP Service Certificate", p: "For drivers who complete the three-day training and pass the oral language exam, the practical scenario and the written exam. Valid two years.", href: "training" },
+          { src: "/assets/cert-attestation-1100.webp", w: 1100, h: 777, alt: "Attestation of Completion diploma", h3: "Attestation of Completion", p: "For drivers who attend every day of the training. No expiry.", href: "training" },
+        ], cta: { label: "See the training and certification", href: "training" } },
         { type: "steps", id: "how", h2: "How hiring works", items: [
           { h3: "Talk to us", p: "Languages needed, working days, hours and the kind of bookings you expect." },
           { h3: "Interview", p: "At your depot. You can check his driving licence and driving record certificate." },
@@ -68,8 +72,8 @@ export default {
       ],
     },
     companies: {
-      title: "Private Multilingual Driver for Your Car in Tokyo | {{BRAND}}",
-      meta: "A driver with Japan's Class 2 commercial licence who speaks Japanese, English, Italian, French and Spanish drives your company or executive car by the hour. For visiting executives, VIP guests and days your own driver is away.",
+      title: "Private Driver for Your Own Car in Tokyo | {{BRAND}}",
+      meta: "A Class 2 driver who speaks five languages drives your company or executive car by the hour, for visiting executives and VIP guests in Tokyo.",
       h1: "A professional driver for your own car, in five languages.",
       hero: { kicker: "Private and executive driver by the hour, Tokyo", sub: "Your driver is {{TEACHER}}, our founder, in person. He holds a Japanese Class 2 licence and has looked after VIP clients and overseas delegations in five languages.", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "Your driver, {{TEACHER}}", cap: "Illustrative photo. On every booking he drives your own vehicle." }, ctas: [{ label: "Ask for rates and availability", href: "#form" }, { label: "See the plans", href: "#plans" }] },
       blocks: [
@@ -95,13 +99,13 @@ export default {
           "Motor insurance that covers any driver, including age conditions",
           "Fuel, tolls and parking paid at cost",
           "The ride is not one you charge your passengers for (travel agencies cannot use this service to transport their paying guests)",
-        ], note: "Please confirm your policy with your insurer before booking. Our liability insurance: {{PH:cover being confirmed}}" },
+        ], note: "Please confirm your policy with your insurer before booking. We present the cover of our own liability insurance with the quote." },
         { type: "notice", h2: "Need a car with the driver, or several cars?", paras: ["We drive one vehicle that belongs to you. For a car and driver together, or for several cars, book Driven Tokyo, a chauffeur service operated by a licensed hire operator."], cta: { label: "Book a car with driver at Driven Tokyo", href: "https://driventokyo.com/" } },
         { type: "profile", h2: "Your driver", name: "{{TEACHER}}", photo: { ...{"src": "/assets/fulvio-portrait.webp", "w": 380, "h": 507}, alt: "Driver {{TEACHER}}" }, paras: ["An Italian based in Tokyo. He holds a Japanese Class 2 licence and has chauffeured VIP clients and hosted overseas delegations in Japanese, English, Italian, French and Spanish.", "He signs a non-disclosure agreement for every engagement. No photos, no social media.", "He also trains the drivers of hire and taxi operators for {{CERT}}."], chips: ["Italiano", "English", "日本語", "Français", "Español"], link: { page: "training", label: "About VIP service training and certification" } },
         { type: "faq", h2: "Questions", items: [
           { q: "Who will drive?", a: "{{TEACHER}}, our founder, in person. He is never replaced by another driver. If he is not free, we do not take the booking." },
           { q: "Is it legal for you to drive our white-plate car?", a: "Under guidance from Japan's Ministry of Land, Infrastructure, Transport and Tourism, driving someone else's vehicle at their request and being paid for the driving is not paid passenger transport (guideline on transport not requiring a permit or registration under the Road Transport Act, 1 March 2024). This is the only way we work." },
-          { q: "What happens in an accident?", a: "Your vehicle's motor insurance applies. Our liability insurance: {{PH:details to be published}}. Please make sure your policy covers any driver before booking." },
+          { q: "What happens in an accident?", a: "Your vehicle's motor insurance applies. We present the cover of our own liability insurance with the quote. Please make sure your policy covers any driver before booking." },
           { q: "How far ahead should we book?", a: "Standard bookings close at 5 pm the day before. Same-day requests are accepted only when he is free. With one driver, it is best to book as soon as your dates are set." },
           { q: "Can you provide the car too?", a: "We do not supply vehicles. For a car and driver together, book Driven Tokyo (driventokyo.com), operated by a licensed hire operator." },
           { q: "Which languages do you cover?", a: "Japanese, English, Italian, French and Spanish." },
@@ -111,8 +115,8 @@ export default {
       ],
     },
     drivers: {
-      title: "Work With Us | Driver Pre-registration | {{BRAND}}",
-      meta: "Drivers with a Japanese Class 2 licence and foreign languages can pre-register with us. We are not hiring right now; this is a list for future contact.",
+      title: "Work With Us, Driver Pre-registration | {{BRAND}}",
+      meta: "Pre-register as a driver with a Japanese Class 2 licence and foreign languages. We are not hiring right now; this list is for future contact.",
       h1: "Work with us.",
       hero: { kicker: "Driver pre-registration", sub: "We are not hiring at the moment. When we are ready to welcome drivers, the people on this list will hear from us first.", ctas: [{ label: "Pre-register", href: "#form" }] },
       blocks: [
@@ -131,9 +135,9 @@ export default {
       ],
     },
     training: {
-      title: "VIP Chauffeur Training and Certification in Japan | {{BRAND}}",
-      meta: "A three-day course for drivers of hire and taxi operators in Japan: VIP protocol, service English, in-car practice, exams and {{CERT}}, verifiable by QR code. A private certification issued by {{BRAND}}.",
-      h1: "{{CERT}}",
+      title: "VIP Chauffeur Training and Certification | {{BRAND}}",
+      meta: "Three-day training for hire and taxi drivers: VIP protocol, service language, in-car practice, exams and the {{CERT}}. We come to your depot.",
+      h1: "VIP service training and certification for drivers",
       hero: { kicker: "Driver training and certification", sub: "A three-day company course for drivers who look after foreign VIP clients.", line: "Trainer: {{TEACHER}}. Five languages, VIP chauffeuring and delegation hosting in Tokyo.", ctas: [{ label: "Request the programme and a quote", href: "#form" }, { label: "Verify a certificate", href: "verify" }], img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "Trainer {{TEACHER}}" } },
       blocks: [
         { type: "text", h2: "For hotels, DMCs and agencies checking a driver", paras: [
@@ -141,7 +145,7 @@ export default {
           "The course is sold to operators, not to individual drivers. It covers what an international client expects before the car moves: language, discretion and protocol.",
         ] },
         { type: "cards", id: "program", h2: "The three days", cols: 3, items: [
-          { tag: "Day 1 · taught in Japanese or Chinese", h3: "The VVIP standard", list: ["Expectations of Western and Middle Eastern clients", "Greeting, doors, seating, luggage, when to speak", "Confidentiality and NDAs", "Photos and social media", "Working with assistants, security and family offices", "Five-star hotel standard for car and uniform", "Onboard amenities", "Handling the unexpected"], meta: "7 hours" },
+          { tag: "Day 1 · taught in Japanese or English", h3: "The VVIP standard", list: ["Expectations of Western and Middle Eastern clients", "Greeting, doors, seating, luggage, when to speak", "Confidentiality and NDAs", "Photos and social media", "Working with assistants, security and family offices", "Five-star hotel standard for car and uniform", "Onboard amenities", "Handling the unexpected"], meta: "7 hours" },
           { tag: "Day 2", h3: "Service language", list: ["The 60 phrases that cover 90 per cent of situations", "Pronunciation", "Recorded role play: airport, hotel, restaurant, shopping, emergency", "Using translation apps properly", "Written messages: confirmations, delays, apologies"], meta: "7 hours", foot: "Optional: Italian, French, Spanish" },
           { tag: "Day 3", h3: "In-car practice", list: ["Real scenarios with the trainer as the client", "Coordinating with security", "Alternative routes", "Discreet stops and waiting", "Defensive driving basics"], meta: "7 hours", foot: "Advanced: evasive driving on a closed track with an external partner, booked separately" },
         ] },
@@ -178,7 +182,7 @@ export default {
         { type: "faq", h2: "Questions", items: [
           { q: "How is this different from the Tokyo Taxi Center courses?", a: "The Tokyo Taxi Center runs training required by law for drivers in Tokyo. This course does not replace it. It is additional training for drivers who look after foreign VIP clients." },
           { q: "Who can attend?", a: "Drivers who hold a Class 2 licence. New hires working towards the licence may attend, but exams and certification take place after the licence is issued." },
-          { q: "What language is the course taught in?", a: "Days 1 and 3 are taught in Japanese or Chinese. Day 2 focuses on English, with Italian, French or Spanish as options." },
+          { q: "What language is the course taught in?", a: "Days 1 and 3 are taught in Japanese or English. Day 2 focuses on English, with Italian, French or Spanish as options." },
           { q: "Where does it take place?", a: "We come to you. Training and all three exams take place at your office or depot, with your own vehicles. Classroom days and the oral and written exams can also be done by Zoom or Google Meet. The in-car practice and the practical exam take place at your premises." },
           { q: "How large is a group?", a: "Up to {{MAXG}} drivers per session, to keep the in-car practice on day 3 personal. Larger groups are split into separate sessions. A single driver can join an open class." },
           { q: "What if a driver fails?", a: "One free retake of the failed exam within 60 days. Later retakes cost {{TPRICE:retake}} per driver (excl. tax)." },
@@ -193,6 +197,19 @@ export default {
       title: "Verify a Driver Certificate | {{BRAND}}", meta: "Enter a {{CERT}} number to check validity, certified languages and expiry date.",
       h1: "Verify a certificate", sub: "Enter the number shown by the driver, or scan the QR code.",
       blocks: [ { type: "verify" }, { type: "notice", paras: ["{{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification."] } ],
+    },
+    tokushoho: {
+      title: "Legal Notice (Specified Commercial Transactions Act) | {{BRAND}}", meta: "Legal notice of {{BRAND}} under Japan's Act on Specified Commercial Transactions: seller, address, contact, prices, payment and cancellation.",
+      h1: "Legal notice", sub: "Information required by Japan's Act on Specified Commercial Transactions.",
+      blocks: [
+        { type: "text", h2: "Seller", list: ["Seller: {{COMPANY}} (service name: {{BRAND}})", "Responsible person: {{REP}}", "Address: {{ADDRESS}}", "Telephone: +81 89-906-5162 (10:00 to 18:00 JST, weekdays; for anything urgent please email)", "Email: {{PRIVACY_EMAIL}}", "Website: hiredriverjapan.com"] },
+        { type: "text", h2: "Prices", paras: ["The prices shown on each service page, or the amount confirmed in your quote, including consumption tax. Driving is charged by the hour and the total is confirmed in the quote."] },
+        { type: "text", h2: "Costs other than the price", paras: ["For driving, fuel, tolls and parking are paid at cost. For training outside Tokyo, travel and accommodation are quoted separately. Bank transfer fees are paid by the client."] },
+        { type: "text", h2: "Payment methods and timing", list: ["Credit card (Visa, Mastercard, JCB, American Express): through the payment link we send you (hiredriverjapan.com/p/…), before the service.", "Bank transfer: companies may pay by monthly invoice, due at the end of the following month. Training is paid at least seven days before the first day."] },
+        { type: "text", h2: "When the service is provided", paras: ["Driving on the date and time confirmed in the booking. Training on the dates confirmed at registration. Certificates and attestations are issued within seven days of completion (certificates after passing the exams)."] },
+        { type: "text", h2: "Cancellation", list: ["Driving: free up to 48 hours before the service; 50% within 48 hours; 100% within 24 hours or for a no-show.", "Training: free up to seven days before the first day; 50% within seven days; 100% within 48 hours. One change of dates is free.", "If we cannot provide the service for reasons beyond our control, such as weather or disaster, we offer another date or a full refund."] },
+        { type: "text", h2: "Returns", paras: ["Because of the nature of the service, no returns or refunds are possible after the service has been provided. If a service we provided was defective through our fault, we handle it case by case."] },
+      ],
     },
     privacy: {
       title: "Privacy Notice | {{BRAND}}", meta: "How {{BRAND}} handles personal information: what we collect, why, who processes it for us, how we protect it and how to make a request.", noindex: true,

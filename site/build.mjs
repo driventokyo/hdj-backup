@@ -1,13 +1,15 @@
 // Generatore statico: content/{lang}.mjs + config.mjs -> dist/
 // Uso: node build.mjs
 import fs from "node:fs";
+import crypto from "node:crypto";
 import path from "node:path";
 import { CONFIG as C } from "./config.mjs";
+import { POSTS } from "./content/blog.mjs";
 
 const OUT = path.resolve("dist");
 const LANG_META = { ja: { html: "ja", og: "ja_JP", label: "日本語" }, zh: { html: "zh-Hans", og: "zh_CN", label: "中文" }, en: { html: "en", og: "en_US", label: "English" } };
-const PAGES = ["home", "companies", "drivers", "training", "verify", "privacy"];
-const SLUG = { home: "", companies: "companies/", drivers: "drivers/", training: "training/", verify: "verify/", privacy: "privacy/" };
+const PAGES = ["home", "companies", "drivers", "training", "verify", "privacy", "tokushoho"];
+const SLUG = { home: "", blog: "blog/", tokushoho: "legal/", companies: "companies/", drivers: "drivers/", training: "training/", verify: "verify/", privacy: "privacy/" };
 const content = {};
 for (const l of C.LANGS) content[l] = (await import(`./content/${l}.mjs`)).default;
 
@@ -44,6 +46,12 @@ function block(b, l) {
   switch (b.type) {
     case "text":
       return `<section${id} class="sec">${h2}${intro}${(b.paras || []).map((p) => `<p>${F(p, l)}</p>`).join("")}${b.list ? `<ul class="ticks">${b.list.map((x) => `<li>${F(x, l)}</li>`).join("")}</ul>` : ""}${b.note ? `<p class="note">${F(b.note, l)}</p>` : ""}</section>`;
+    case "post":
+      return `<article class="sec post">${b.lead ? `<p class="intro">${F(b.lead, l)}</p>` : ""}${b.sections.map((x) => `<h2>${F(x.h2, l)}</h2>${(x.paras || []).map((q) => `<p>${F(q, l)}</p>`).join("")}${x.list ? `<ul class="ticks">${x.list.map((q) => `<li>${F(q, l)}</li>`).join("")}</ul>` : ""}`).join("")}${b.imgs && b.imgs.length ? b.imgs.map((im) => `<figure class="pimg"><img src="${im.src}" alt="${esc(im["alt_" + l] || im.alt_en || "")}" loading="lazy" decoding="async">${im.credit ? `<figcaption>${esc(im.credit)}</figcaption>` : ""}</figure>`).join("") : ""}${b.note ? `<p class="note">${F(b.note, l)}</p>` : ""}</article>`;
+    case "postlist":
+      return `<section class="sec"><div class="plist">${b.items.map((x) => `<a class="pcard" href="${x.href}"><span class="pdate">${esc(x.date)}</span><strong>${esc(x.title)}</strong><span>${esc(x.meta)}</span><em>${esc(t.readMore)}</em></a>`).join("")}</div></section>`;
+    case "figures":
+      return `<section${id} class="sec">${h2}${intro}<div class="figs">${b.items.map((it) => `<figure class="fig">${it.href ? `<a href="/${l}/${SLUG[it.href]}">` : ""}<img src="${it.src}" alt="${esc(fill(it.alt, l))}" width="${it.w}" height="${it.h}" loading="lazy" decoding="async">${it.href ? "</a>" : ""}<figcaption><strong>${F(it.h3, l)}</strong>${it.p ? `<span>${F(it.p, l)}</span>` : ""}</figcaption></figure>`).join("")}</div>${b.note ? `<p class="note">${F(b.note, l)}</p>` : ""}${b.cta ? `<p class="ctas"><a class="btn ghost" href="${b.cta.href.startsWith("#") ? b.cta.href : `/${l}/${SLUG[b.cta.href]}`}">${F(b.cta.label, l)}</a></p>` : ""}</section>`;
     case "cards":
       return `<section${id} class="sec">${h2}${intro}<div class="cards c${b.cols || 3}">${b.items.map((it) => `<article class="card">${it.tag ? `<p class="tag">${F(it.tag, l)}</p>` : ""}<h3>${F(it.h3, l)}</h3>${it.p ? `<p>${F(it.p, l)}</p>` : ""}${it.list ? `<ul>${it.list.map((x) => `<li>${F(x, l)}</li>`).join("")}</ul>` : ""}${it.meta ? `<p class="meta">${F(it.meta, l)}</p>` : ""}${it.foot ? `<p class="foot">${F(it.foot, l)}</p>` : ""}</article>`).join("")}</div>${b.note ? `<p class="note">${F(b.note, l)}</p>` : ""}</section>`;
     case "steps":
@@ -105,7 +113,7 @@ function social(l, title, desc, url) {
 }
 
 function jsonld(page, l, p) {
-  const org = { "@type": "Organization", "@id": C.SITE_URL + "/#org", name: C.BRAND_NAME, alternateName: [C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", logo: { "@type": "ImageObject", url: C.SITE_URL + "/assets/icon-512.png", width: 512, height: 512 } };
+  const org = { "@type": "Organization", "@id": C.SITE_URL + "/#org", name: C.BRAND_NAME, alternateName: [C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", logo: { "@type": "ImageObject", url: C.SITE_URL + "/assets/icon-512.png", width: 512, height: 512 }, address: { "@type": "PostalAddress", addressRegion: "Tokushima", addressCountry: "JP" }, areaServed: { "@type": "City", name: "Tokyo" }, contactPoint: { "@type": "ContactPoint", contactType: "sales", email: C.CONTACT_EMAIL || undefined, availableLanguage: ["ja", "en", "it", "fr", "es"] } };
   if (C.CONTACT_EMAIL) org.email = C.CONTACT_EMAIL;
   const graph = [org, { "@type": "WebSite", "@id": C.SITE_URL + "/#site", name: C.BRAND_NAME, alternateName: [C.BRAND_KANA, C.BRAND_ZH], url: C.SITE_URL + "/", inLanguage: LANG_META[l].html, publisher: { "@id": C.SITE_URL + "/#org" } }];
   if (page === "training") {
@@ -114,7 +122,9 @@ function jsonld(page, l, p) {
       offers: { "@type": "Offer", category: "Paid", priceCurrency: "JPY", price: C.TRAINING_PRICES.full } });
   }
   if (page === "home" || page === "companies") graph.push({ "@type": "Service", name: p.h1.replace(/<[^>]+>/g, ""), serviceType: page === "home" ? "Multilingual professional driver for hire car operators" : "Chauffeur", areaServed: { "@type": "City", name: "Tokyo" }, provider: { "@id": C.SITE_URL + "/#org" }, description: p.meta });
-  if (page !== "home") graph.push({ "@type": "BreadcrumbList", itemListElement: [
+  if (p.article) graph.push({ "@type": "BlogPosting", headline: p.h1, description: p.meta, datePublished: p.article.date, dateModified: p.article.updated || p.article.date, inLanguage: LANG_META[l].html, author: { "@type": "Person", name: C.TEACHER_NAME }, publisher: { "@id": C.SITE_URL + "/#org" }, mainEntityOfPage: p.url, ...(p.article.image ? { image: C.SITE_URL + p.article.image } : {}) });
+  if (p.article) graph.push({ "@type": "BreadcrumbList", itemListElement: [{ "@type": "ListItem", position: 1, name: C.BRAND_NAME, item: `${C.SITE_URL}/${l}/` }, { "@type": "ListItem", position: 2, name: content[l].ui.blogLink, item: `${C.SITE_URL}/${l}/blog/` }, { "@type": "ListItem", position: 3, name: p.h1, item: p.url }] });
+  else   if (page !== "home") graph.push({ "@type": "BreadcrumbList", itemListElement: [
     { "@type": "ListItem", position: 1, name: C.BRAND_NAME, item: `${C.SITE_URL}/${l}/` },
     { "@type": "ListItem", position: 2, name: (content[l].nav.find(([k]) => k === page) || [, p.h1])[1].replace(/<[^>]+>/g, "").replace(/\{\{CERT\}\}/g, C.CERT_NAME), item: `${C.SITE_URL}/${l}/${SLUG[page]}` },
   ] });
@@ -123,18 +133,19 @@ function jsonld(page, l, p) {
   return `<script type="application/ld+json">${JSON.stringify({ "@context": "https://schema.org", "@graph": graph })}</script>`;
 }
 
-function page(pageKey, l) {
-  const c = content[l]; const p = c.pages[pageKey]; const t = c.ui;
-  const url = `${C.SITE_URL}/${l}/${SLUG[pageKey]}`;
-  const alt = C.LANGS.map((x) => `<link rel="alternate" hreflang="${LANG_META[x].html}" href="${C.SITE_URL}/${x}/${SLUG[pageKey]}">`).join("") + `<link rel="alternate" hreflang="x-default" href="${C.SITE_URL}/en/${SLUG[pageKey]}">`;
-  const nav = c.nav.map(([k, x]) => `<a href="/${l}/${SLUG[k]}"${k === pageKey ? ' aria-current="page"' : ""}>${esc(x)}</a>`).join("");
-  const langs = C.LANGS.map((x) => `<a href="/${x}/${SLUG[pageKey]}" hreflang="${LANG_META[x].html}" lang="${LANG_META[x].html}"${x === l ? ' aria-current="true"' : ""}>${LANG_META[x].label}</a>`).join("");
+function page(pageKey, l, ext) {
+  const c = content[l]; const p = ext || c.pages[pageKey]; const t = c.ui;
+  const url = ext && ext.url ? ext.url : `${C.SITE_URL}/${l}/${SLUG[pageKey]}`;
+  const sp = ext && ext.slugPath != null ? ext.slugPath : SLUG[pageKey];
+  const alt = C.LANGS.map((x) => `<link rel="alternate" hreflang="${LANG_META[x].html}" href="${C.SITE_URL}/${x}/${sp}">`).join("") + `<link rel="alternate" hreflang="x-default" href="${C.SITE_URL}/en/${sp}">`;
+  const nav = [...c.nav, ["blog", t.blogLink]].map(([k, x]) => `<a href="/${l}/${SLUG[k]}"${k === pageKey ? ' aria-current="page"' : ""}>${esc(x)}</a>`).join("");
+  const langs = C.LANGS.map((x) => `<a href="/${x}/${sp}" hreflang="${LANG_META[x].html}" lang="${LANG_META[x].html}"${x === l ? ' aria-current="true"' : ""}>${LANG_META[x].label}</a>`).join("");
   const heroImg = p.hero && p.hero.img ? `<figure class="himg"><img src="${p.hero.img.src}" srcset="${p.hero.img.srcset || ""}" sizes="(max-width:860px) 100vw, 520px" alt="${esc(fill(p.hero.img.alt, l))}" width="${p.hero.img.w}" height="${p.hero.img.h}" fetchpriority="high" decoding="async">${p.hero.img.cap ? `<figcaption>${F(p.hero.img.cap, l)}</figcaption>` : ""}</figure>` : "";
   const hero = p.hero ? `<header class="hero${heroImg ? " withimg" : ""}${p.hero && p.hero.photoFirst ? " pf" : ""}"><div class="wrap"><div class="htxt">${p.hero.kicker ? `<p class="kicker">${F(p.hero.kicker, l)}</p>` : ""}<h1>${F(p.h1, l)}</h1>${p.hero.sub ? `<p class="sub">${F(p.hero.sub, l)}</p>` : ""}${p.hero.line ? `<p class="line">${F(p.hero.line, l)}</p>` : ""}${p.hero.ctas ? `<p class="ctas">${p.hero.ctas.map((x, i) => `<a class="btn${i ? " ghost" : ""}${x.book ? " book" : ""}" href="${x.href.startsWith("#") ? x.href : `/${l}/${SLUG[x.href]}`}">${F(x.label, l)}</a>`).join("")}</p>` : ""}</div>${heroImg}</div></header>` : `<header class="hero small"><div class="wrap"><h1>${F(p.h1, l)}</h1>${p.sub ? `<p class="sub">${F(p.sub, l)}</p>` : ""}</div></header>`;
   const body = (p.blocks || []).filter((b) => !b.ifConfig || C[b.ifConfig]).map((b) => block(b, l)).join("");
   const robots = p.noindex || C.PRELAUNCH ? `<meta name="robots" content="noindex">` : "";
   const ts = C.TURNSTILE_SITEKEY && (p.blocks || []).some((b) => b.type === "form") ? `<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>` : "";
-  return `<!doctype html><html lang="${LANG_META[l].html}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(fill(p.title, l))}</title><meta name="description" content="${esc(fill(p.meta, l).replace(/<[^>]+>/g, ""))}">${robots}<link rel="canonical" href="${url}">${alt}${social(l, fill(p.title, l), fill(p.meta, l).replace(/<[^>]+>/g, ""), url)}<link rel="preload" href="/assets/fonts/cormorant-600.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/jost.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/site.css">${jsonld(pageKey, l, p)}${ts}</head><body><a class="skip" href="#main">${esc(t.skip)}</a><div class="top"><div class="wrap bar"><a class="logo" href="/${l}/"><img class="mark" src="/assets/hdj-mark.svg" width="38" height="38" alt=""><span class="lt"><span class="wm"><b>HIRE</b> driver japan</span><small>${esc(l === "zh" ? C.BRAND_ZH : l === "ja" ? C.BRAND_KANA : t.tagShort)}</small></span></a><button class="menu" aria-expanded="false" aria-controls="nav">${esc(t.menu)}</button><nav id="nav" aria-label="${esc(t.menu)}">${nav}<span class="langs">${langs}</span></nav></div></div><main id="main">${hero}<div class="wrap">${body}</div></main><footer class="foot"><div class="wrap"><p class="fbrand"><b>HIRE</b> driver japan</p><p>${esc(content[l].ui.operatedBy)} ${esc(l === "en" ? C.COMPANY_EN : C.COMPANY_JA)}</p><p>${C.COMPANY_ADDRESS ? esc(l === "en" && C.COMPANY_ADDRESS_EN ? C.COMPANY_ADDRESS_EN : C.COMPANY_ADDRESS) : `<mark class="ph">${esc(t.addressPh)}</mark>`}</p><p class="legal">${F(c.footerLegal, l)}</p><p><a href="/${l}/privacy/">${esc(t.privacyLink)}</a> · <a href="/${l}/verify/">${esc(t.verifyNav)}</a></p><p class="langs">${langs}</p></div></footer><script src="/assets/site.js" defer></script></body></html>`;
+  return `<!doctype html><html lang="${LANG_META[l].html}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(fill(p.title, l))}</title><meta name="description" content="${esc(fill(p.meta, l).replace(/<[^>]+>/g, ""))}">${robots}<link rel="canonical" href="${url}">${alt}${social(l, fill(p.title, l), fill(p.meta, l).replace(/<[^>]+>/g, ""), url)}<link rel="preload" href="/assets/fonts/cormorant-600.woff2" as="font" type="font/woff2" crossorigin><link rel="preload" href="/assets/fonts/jost.woff2" as="font" type="font/woff2" crossorigin><link rel="stylesheet" href="/assets/site.css">${jsonld(pageKey, l, p)}${ts}</head><body><a class="skip" href="#main">${esc(t.skip)}</a><div class="top"><div class="wrap bar"><a class="logo" href="/${l}/"><img class="mark" src="/assets/hdj-mark.svg" width="38" height="38" alt=""><span class="lt"><span class="wm"><b>HIRE</b> driver japan</span><small>${esc(l === "zh" ? C.BRAND_ZH : l === "ja" ? C.BRAND_KANA : t.tagShort)}</small></span></a><button class="menu" aria-expanded="false" aria-controls="nav">${esc(t.menu)}</button><nav id="nav" aria-label="${esc(t.menu)}">${nav}<span class="langs">${langs}</span></nav></div></div><main id="main">${hero}<div class="wrap">${body}</div></main><footer class="foot"><div class="wrap"><p class="fbrand"><b>HIRE</b> driver japan</p><p>${esc(content[l].ui.operatedBy)} ${esc(l === "en" ? C.COMPANY_EN : C.COMPANY_JA)}</p><p>${C.COMPANY_ADDRESS ? esc(l === "en" && C.COMPANY_ADDRESS_EN ? C.COMPANY_ADDRESS_EN : C.COMPANY_ADDRESS) : `<mark class="ph">${esc(t.addressPh)}</mark>`}</p><p class="legal">${F(c.footerLegal, l)}</p><p><a href="/${l}/blog/">${esc(t.blogLink)}</a> · <a href="/${l}/legal/">${esc(t.tokushohoLink)}</a> · <a href="/${l}/privacy/">${esc(t.privacyLink)}</a> · <a href="/${l}/verify/">${esc(t.verifyNav)}</a></p><p class="langs">${langs}</p></div></footer><script src="/assets/site.js" defer></script></body></html>`;
 }
 
 // build
@@ -153,12 +164,36 @@ for (const l of C.LANGS) for (const k of PAGES) {
   fs.writeFileSync(path.join(dir, "index.html"), page(k, l));
   if (!content[l].pages[k].noindex) urls.push({ k, l });
 }
+// blog: un articolo per lingua, piu' l'indice
+const blogUrls = [];
+for (const l of C.LANGS) {
+  const t = content[l].ui;
+  for (const post of POSTS) {
+    const d = post[l]; if (!d) continue;
+    const slugPath = `blog/${post.slug}/`, url = `${C.SITE_URL}/${l}/${slugPath}`;
+    const faq = d.faq && d.faq.length ? [{ type: "faq", h2: l === "ja" ? "よくあるご質問" : l === "zh" ? "常见问题" : "Questions", items: d.faq }] : [];
+    const ext = { title: d.title, meta: d.meta, h1: d.h1, sub: `${t.posted}: ${post.date}`, url, slugPath, article: { date: post.date, updated: post.updated, image: post.imgs && post.imgs[0] ? post.imgs[0].src : null },
+      blocks: [{ type: "post", lead: d.lead, sections: d.sections, imgs: post.imgs, note: d.note }, ...faq] };
+    const dir = path.join(OUT, l, slugPath); fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(path.join(dir, "index.html"), page("blog", l, ext));
+    blogUrls.push({ l, slugPath });
+  }
+  const items = POSTS.filter((x) => x[l]).sort((a, b) => b.date.localeCompare(a.date)).map((x) => ({ href: `/${l}/blog/${x.slug}/`, date: x.date, title: x[l].h1, meta: x[l].meta }));
+  const idx = { title: t.blogIndexTitle + " | " + C.BRAND_NAME, meta: t.blogIndexMeta, h1: t.blogLink, sub: t.blogIndexMeta, url: `${C.SITE_URL}/${l}/blog/`, slugPath: "blog/", blocks: [{ type: "postlist", items }] };
+  const dir = path.join(OUT, l, "blog"); fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "index.html"), page("blog", l, idx));
+  blogUrls.push({ l, slugPath: "blog/" });
+}
 // home radice: sceglie la lingua
 fs.writeFileSync(path.join(OUT, "index.html"), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(fill(content.ja.pages.home.title, "ja"))}</title><meta name="description" content="${esc(fill(content.ja.pages.home.meta, "ja"))}">${C.PRELAUNCH ? `<meta name="robots" content="noindex">` : ""}<link rel="canonical" href="${C.SITE_URL}/ja/">${social("ja", fill(content.ja.pages.home.title, "ja"), fill(content.ja.pages.home.meta, "ja"), C.SITE_URL + "/")}${C.LANGS.map((x) => `<link rel="alternate" hreflang="${LANG_META[x].html}" href="${C.SITE_URL}/${x}/">`).join("")}<link rel="alternate" hreflang="x-default" href="${C.SITE_URL}/en/"><link rel="stylesheet" href="/assets/site.css"><script>(function(){var n=(navigator.language||"").toLowerCase();var l=n.indexOf("ja")===0?"ja":n.indexOf("zh")===0?"zh":n?"en":"ja";location.replace("/"+l+"/");})();</script></head><body><main class="wrap pick"><h1>${esc(C.BRAND_NAME)}</h1><p>${C.LANGS.map((x) => `<a class="btn" href="/${x}/">${LANG_META[x].label}</a>`).join(" ")}</p></main></body></html>`);
-const lastmod = new Date().toISOString().slice(0, 10);
-fs.writeFileSync(path.join(OUT, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${urls.map(({ k, l }) => `<url><loc>${C.SITE_URL}/${l}/${SLUG[k]}</loc><lastmod>${lastmod}</lastmod>${C.LANGS.map((x) => `<xhtml:link rel="alternate" hreflang="${LANG_META[x].html}" href="${C.SITE_URL}/${x}/${SLUG[k]}"/>`).join("")}<xhtml:link rel="alternate" hreflang="x-default" href="${C.SITE_URL}/en/${SLUG[k]}"/></url>`).join("\n")}\n</urlset>\n`);
+// lastmod reale: ogni pagina ha una data che cambia solo quando cambia il suo HTML (impronta salvata in lastmod.json)
+const LM_FILE = "lastmod.json"; const LM = fs.existsSync(LM_FILE) ? JSON.parse(fs.readFileSync(LM_FILE, "utf8")) : {};
+const today = new Date().toISOString().slice(0, 10);
+const lastmodOf = (k, l, sp) => { const key = `${l}/${sp != null ? sp : SLUG[k]}`; const html = fs.readFileSync(path.join(OUT, l, sp != null ? sp : SLUG[k], "index.html"), "utf8"); const h = crypto.createHash("sha1").update(html).digest("hex").slice(0, 16); if (!LM[key] || LM[key].h !== h) LM[key] = { h, d: today }; return LM[key].d; };
+fs.writeFileSync(path.join(OUT, "sitemap.xml"), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${[...urls.map(({ k, l }) => ({ l, sp: SLUG[k], k })), ...blogUrls.map((x) => ({ l: x.l, sp: x.slugPath, k: "blog" }))].map(({ k, l, sp }) => `<url><loc>${C.SITE_URL}/${l}/${sp}</loc><lastmod>${lastmodOf(k, l, sp)}</lastmod>${C.LANGS.map((x) => `<xhtml:link rel="alternate" hreflang="${LANG_META[x].html}" href="${C.SITE_URL}/${x}/${sp}"/>`).join("")}<xhtml:link rel="alternate" hreflang="x-default" href="${C.SITE_URL}/en/${sp}"/></url>`).join("\n")}\n</urlset>\n`);
 // Come driventokyo.com: assistenti e motori AI nominati esplicitamente. I gruppi di robots.txt non si ereditano, quindi ogni agente sta nello stesso blocco con i Disallow.
 const AGENTS = ["*", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Amazonbot", "meta-externalagent", "cohere-ai", "MistralAI-User"];
+fs.writeFileSync(LM_FILE, JSON.stringify(LM, null, 0));
 fs.writeFileSync(path.join(OUT, "robots.txt"), `# Search engines, assistants and answer engines are welcome to read and cite this site.\n\n${AGENTS.map((a) => `User-agent: ${a}`).join("\n")}\nAllow: /\nDisallow: /admin/\nDisallow: /academy/\nDisallow: /api/\nDisallow: /verify/2\n\nSitemap: ${C.SITE_URL}/sitemap.xml\n`);
 fs.writeFileSync(path.join(OUT, "llms.txt"), fs.readFileSync("llms.txt", "utf8").replaceAll("{{SITE}}", C.SITE_URL).replaceAll("{{BRAND}}", C.BRAND_NAME).replaceAll("{{CERT}}", C.CERT_NAME).replaceAll("{{TEACHER}}", C.TEACHER_NAME));
 // 404 vera (status 404, non 200 come la SPA di Driven), con il marchio

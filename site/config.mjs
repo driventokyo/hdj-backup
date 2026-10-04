@@ -12,7 +12,7 @@ export const CONFIG = {
   REPRESENTATIVE_JA: "代表取締役社長 コンベルシ フルビオ",                  // rappresentante legale come in visura, es. "代表取締役 ○○○○" (obbligatorio nella privacy, art. 32)
   REPRESENTATIVE_EN: "Fulvio Conversi, Representative Director and President",                  // es. "Representative Director ○○○○"
   PRIVACY_EMAIL: "info@hiredriverjapan.com",                      // casella per richieste privacy; se null usa CONTACT_EMAIL
-  PRIVACY_DATE: null,                       // data di entrata in vigore, es. "2026-10-10"
+  PRIVACY_DATE: "2026-10-04",                       // data di entrata in vigore, es. "2026-10-10"
   SITE_URL: "https://hiredriverjapan.com",
   CONTACT_EMAIL: "info@hiredriverjapan.com",                      // destinatario delle richieste: va anche nella variabile del Worker
   TEACHER_NAME: "Fulvio",                      // nome del docente

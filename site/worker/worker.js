@@ -1,6 +1,7 @@
 // HIRE driver japan · Worker unico: /api/lead, /verify/{id}, /api/verify/{id}, /api/admin/*, cron.
 // Il resto (pagine statiche e pannello) lo serve [assets] da dist/.
 import { academyPublic, academyAdmin } from "./academy.js";
+import { payPublic, stripeWebhook, payAdmin } from "./payments.js";
 
 const now = () => new Date().toISOString();
 const json = (o, s = 200, h = {}) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...h } });
@@ -23,6 +24,13 @@ export default {
     const res = await route(req, env, ctx);
     const out = new Response(res.body, res);
     for (const [k, v] of Object.entries(SEC)) out.headers.set(k, v);
+    const ct = out.headers.get("content-type") || "", path = new URL(req.url).pathname;
+    if (ct.startsWith("text/html") && !ct.includes("charset")) out.headers.set("content-type", "text/html; charset=utf-8");
+    // asset statici: i browser li tengono (font e immagini un anno; css e js un giorno; le og hanno il numero di versione nel nome)
+    if (res.status === 200 && !out.headers.has("x-no-cache")) {
+      if (/^\/assets\/(fonts\/|.*\.(webp|png|jpg|svg|ico))/.test(path) || path === "/favicon.ico") out.headers.set("cache-control", "public, max-age=31536000, immutable");
+      else if (/^\/assets\/.*\.(css|js)$/.test(path)) out.headers.set("cache-control", "public, max-age=86400, stale-while-revalidate=604800");
+    }
     return out;
   },
   async scheduled(evt, env, ctx) { ctx.waitUntil(daily(env).catch((e) => console.error("cron error", e && e.stack || e))); },
@@ -34,6 +42,7 @@ async function route(req, env, ctx) {
     const p = url.pathname;
     if (url.protocol === "http:" && url.hostname.endsWith("hiredriverjapan.com")) { url.protocol = "https:"; url.hostname = url.hostname.replace(/^www\./, ""); return Response.redirect(url.toString(), 301); }
     if (url.hostname.startsWith("www.")) { url.hostname = url.hostname.slice(4); return Response.redirect(url.toString(), 301); }
+    if (/^\/(ja|en|zh)(\/[a-z0-9-]+)*$/.test(p)) { url.pathname = p + "/"; return Response.redirect(url.toString(), 301); } // slash finale, permanente
     try {
       if (p === "/api/lead" && req.method === "POST") return await lead(req, env, ctx);
       if (p === "/verify" || p === "/verify/") { const id = url.searchParams.get("id") || ""; return Response.redirect(new URL(/^\d{4}-\d{4}$/.test(id) ? `/verify/${id}` : "/en/verify/", url), 302); }
@@ -42,6 +51,8 @@ async function route(req, env, ctx) {
       if ((m = p.match(/^\/api\/verify\/(\d{4}-\d{4})$/))) return await verifyApi(m[1], url, env, ctx);
       if ((m = p.match(/^\/(ja|en|zh)\/operators\/?$/))) return Response.redirect(new URL(`/${m[1]}/`, url), 301); // pagina operatori assorbita nella home
       if (p.startsWith("/api/academy/")) return await academyPublic(req, env, url);
+      if (p === "/api/stripe/webhook" && req.method === "POST") return await stripeWebhook(req, env);
+      if (p.startsWith("/p/")) { const r = await payPublic(req, env, url); if (r) return r; }
       if (p.startsWith("/api/admin/")) return await admin(req, env, url);
       if (p.startsWith("/api/")) return json({ ok: false, error: "not_found" }, 404);
       return env.ASSETS.fetch(req);
@@ -179,6 +190,7 @@ async function admin(req, env, url) {
 
   if (p === "/me") return json({ ok: true, user: u });
   if (p.startsWith("/academy/")) { const r = await academyAdmin(req, env, url, u, p, M, body); if (r) return r; }
+  if (p.startsWith("/payments")) { const r = await payAdmin(req, env, url, u, p, M, body); if (r) return r; }
   if (p === "/cron-run" && M === "POST") { if (!isAdmin) return deny(); try { await daily(env); return json({ ok: true }); } catch (e) { return json({ ok: false, error: "cron_failed", hint: String(e && e.message || e) }, 500); } }
 
   // lead e candidature

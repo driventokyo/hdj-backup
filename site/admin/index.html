@@ -52,7 +52,7 @@ function login(){$("#tabs").innerHTML="";$("#who").textContent="";
   app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
 
-const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
+const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["pay","Pagamenti"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
 const TABS_TEACHER=[["courses","Le mie sessioni"]];
 const TABS_OPERATOR=[["refs","案件ボード"],["stmts","請求書"],["acad","研修の進捗"],["certs","乗務員の認証"]];
 async function start(){
@@ -64,7 +64,7 @@ async function start(){
   show(tabs[0][0]);counts();setInterval(counts,60000);
 }
 async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}const o=$("#c-refs");if(o&&ME.role==="operator"){o.hidden=!c.open_jobs;o.textContent=c.open_jobs}document.title=(ME.role==="operator"?(c.open_jobs?`(${c.open_jobs}) `:"")+"案件ボード":(n?`(${n}) `:"")+"Pannello")+" · HIRE driver japan"}catch(_){}}
-function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,acad,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
+function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,acad,pay,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
 
 // ---- Richieste: pipeline
 let leadKind="service";
@@ -297,6 +297,21 @@ async function acadLearnersOp(){
   const j=await api("/academy/learners");
   app.innerHTML=`<p style="color:#5b6875">HDJ Academy（オンライン研修）での御社乗務員の進捗です。動画をすべて見終えると筆記試験を受けられます。3日目の実地練習と実地試験は講師が御社に伺って行います。</p>
   <table><tr><th>乗務員</th><th>動画</th><th>最終利用日</th><th>筆記試験</th></tr>${j.rows.map(d=>`<tr><td>${esc(d.full_name)}</td><td>${d.lessons_done}/${j.lessons_published}</td><td>${d10(d.last_activity)}</td><td>${d.attempts?`${d.best_score}点 ${d.passed?'<span class="tag active">合格</span>':'<span class="tag revoked">不合格</span>'}`:"未受験"}</td></tr>`).join("")||'<tr><td colspan="4">オンライン研修を受講中の乗務員はいません。</td></tr>'}</table>`;
+}
+
+// ---- Pagamenti: link brandizzati /p/CODE come driventokyo.com
+async function pay(){
+  const j=await api("/payments");
+  const ST={open:["aperto",""],paid:["pagato","active"],void:["annullato","revoked"]};
+  app.innerHTML=`${j.stripe?"":'<div class="panel" style="border-color:#a1281f"><b>Stripe non collegato.</b> Serve l\'account Stripe di HIRE driver japan: chiave segreta e segreto del webhook (vedi istruzioni). I link si creano lo stesso, ma il cliente non puo\' ancora pagare.</div>'}
+  <div class="panel"><h3>Nuovo link di pagamento</h3><p style="color:#5b6875;margin-top:0">Importo base = quello concordato col cliente, IVA inclusa. Il link addebita il base +5% (la fee carta sta sul cliente e non si dichiara come tale). Il cliente apre hiredriverjapan.com/p/CODE: il link non scade.</p>
+  <div class="row"><label>Titolo (lo vede il cliente)<input id="pt" placeholder="es. 10/20 役員送迎 8時間"></label><label>Importo base ¥ (IVA incl.)<input id="pb" type="number" min="1"></label><label>Lingua pagina<select id="pl"><option value="ja">ja</option><option value="en">en</option><option value="zh">zh</option></select></label><label>Email cliente<input id="pe"></label><label>N. richiesta (LB-/LC-/LO-)<input id="pr" placeholder="facoltativo"></label></div>
+  <div class="row"><label>Descrizione (facoltativa)<input id="pd"></label><label>Nota interna<input id="pn"></label><label style="flex:0;min-width:160px">Senza fee +5%<select id="pf"><option value="0">no (default)</option><option value="1">si (eccezione)</option></select></label><button class="b" id="psave">Crea link</button></div></div>
+  <table><tr><th>Codice</th><th>Data</th><th>Titolo</th><th>Base</th><th>Addebito</th><th>Cliente</th><th>Richiesta</th><th>Aperture</th><th>Stato</th><th></th></tr>${j.rows.map(r=>`<tr><td>${r.code}</td><td>${d10(r.created_at)}</td><td>${esc(r.title)}<br><small>${esc(r.note||"")}</small></td><td>${yen(r.base_jpy)}</td><td><b>${yen(r.amount_jpy)}</b>${r.fee_applied?"":" <small>no fee</small>"}</td><td>${esc(r.payer_email||r.email||"")}</td><td>${esc(r.ref||"")}</td><td>${r.opened}</td><td><span class="tag ${ST[r.status][1]}">${ST[r.status][0]}</span>${r.paid_at?`<br><small>${d10(r.paid_at)}</small>`:""}</td><td><button class="b s" data-cp="${r.url}">Copia link</button>${r.status==="open"?` <button class="b s" data-pm="${r.code}">Pagato a mano</button> <button class="b r" data-pv="${r.code}">Annulla</button>`:""}</td></tr>`).join("")||'<tr><td colspan="10">Nessun link.</td></tr>'}</table>`;
+  $("#psave").onclick=async()=>{const r=await api("/payments",{title:$("#pt").value,base_jpy:$("#pb").value,lang:$("#pl").value,email:$("#pe").value,ref:$("#pr").value,description:$("#pd").value,note:$("#pn").value,no_fee:$("#pf").value==="1"});$("#dlgin").innerHTML=`<h3>Link creato</h3><p>Addebito: <b>${yen(r.amount_jpy)}</b></p><pre>${esc(r.url)}</pre><p class="row"><button class="b" id="cpl">Copia</button><button class="b s" onclick="dlg.close()">Fatto</button></p>`;dlg.showModal();$("#cpl").onclick=()=>{navigator.clipboard.writeText(r.url);toast("Copiato")};pay()};
+  app.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.cp);toast("Link copiato")});
+  app.querySelectorAll("[data-pm]").forEach(b=>b.onclick=async()=>{if(!confirm("Segnare come pagato (bonifico o contanti)?"))return;await api("/payments/"+b.dataset.pm,{status:"paid_manual"});pay()});
+  app.querySelectorAll("[data-pv]").forEach(b=>b.onclick=async()=>{if(!confirm("Annullare il link?"))return;await api("/payments/"+b.dataset.pv,{status:"void"});pay()});
 }
 
 // ---- Export
