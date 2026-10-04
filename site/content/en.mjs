@@ -150,11 +150,12 @@ export default {
           { h3: "Written test", p: "Protocol and confidentiality." },
         ], note: "Drivers who attend the full course receive a {{BRAND}} <strong>attestation of completion</strong>. Those who pass all three exams also receive <strong>{{CERT}}</strong>. Both are digital documents with a QR code: anyone can scan them to check validity, languages and expiry. Certification lasts two years and is renewed with a one-day refresher. The attestation does not expire." },
         { type: "notice", h2: "About the certificate", paras: ["{{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification and does not replace any training required by law."] },
+        { type: "notice", id: "onsite", h2: "We come to you", paras: ["Your drivers are already busy, so we do not take them away from the depot. Training and exams take place at your office or depot, with no travel time or cost for your team.", "Classroom days (days 1 and 2) and the oral and written exams can also be taken online by Zoom or Google Meet. The in-car practice on day 3 and the practical exam take place at your premises."] },
         { type: "table", id: "price", h2: "Operator packages (at your depot, up to {{MAXG}} drivers)", head: ["Package", "Includes", "Price (excl. tax)"], rows: [
           ["VVIP certification package", "Three days of training, three exams, {{CERT}} and attestation of completion", "{{TPRICE:pkgCert}}"],
           ["Training package", "Three days of training and attestation of completion (no exams or certification)", "{{TPRICE:pkgTrain}}"],
           ["Introduction package", "Day 1: the VVIP standard (introduction) and attestation of completion", "{{TPRICE:pkgIntro}}"],
-        ], notes: ["Each session takes up to {{MAXG}} drivers. Larger groups are split into separate sessions.", "We come to your office or depot for both the training and the exams.", "Package prices are flat for up to {{MAXG}} drivers. For fewer drivers, join an open class at the individual prices below."] },
+        ], notes: ["Each session takes up to {{MAXG}} drivers. Larger groups are split into separate sessions.", "We come to your office or depot. Classroom days and the oral and written exams are also available by Zoom or Google Meet.", "Package prices are flat for up to {{MAXG}} drivers. For fewer drivers, join an open class at the individual prices below."] },
         { type: "table", h2: "Individual prices (open class, per driver)", head: ["Includes", "Price (excl. tax)"], rows: [
           ["One day of training, with attestation", "{{TPRICE:day}}"],
           ["Three days of training, with attestation", "{{TPRICE:course3}}"],
@@ -177,7 +178,7 @@ export default {
           { q: "How is this different from the Tokyo Taxi Center courses?", a: "The Tokyo Taxi Center runs training required by law for drivers in Tokyo. This course does not replace it. It is additional training for drivers who look after foreign VIP clients." },
           { q: "Who can attend?", a: "Drivers who hold a Class 2 licence. New hires working towards the licence may attend, but exams and certification take place after the licence is issued." },
           { q: "What language is the course taught in?", a: "Days 1 and 3 are taught in Japanese or Chinese. Day 2 focuses on English, with Italian, French or Spanish as options." },
-          { q: "Where does it take place?", a: "We come to you. Training and all three exams take place at your office or depot, with your own vehicles. If you prefer, we can book a room in Tokyo." },
+          { q: "Where does it take place?", a: "We come to you. Training and all three exams take place at your office or depot, with your own vehicles. Classroom days and the oral and written exams can also be done by Zoom or Google Meet. The in-car practice and the practical exam take place at your premises." },
           { q: "How large is a group?", a: "Up to {{MAXG}} drivers per session, to keep the in-car practice on day 3 personal. Larger groups are split into separate sessions. A single driver can join an open class." },
           { q: "What if a driver fails?", a: "One free retake of the failed exam within 60 days. Later retakes cost {{TPRICE:retake}} per driver (excl. tax)." },
           { q: "How does a hotel verify a certificate?", a: "Scan the driver's QR code, or enter the certificate number on our verification page. It shows at once whether the certificate is active, expired or revoked." },
