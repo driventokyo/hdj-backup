@@ -178,6 +178,7 @@ CREATE TABLE IF NOT EXISTS lessons (
   title_ja TEXT NOT NULL, title_en TEXT, summary_ja TEXT, summary_en TEXT,
   notes_ja TEXT, notes_en TEXT,                      -- scheda di studio sotto il video
   video_key TEXT, video_type TEXT, video_bytes INTEGER, duration_s INTEGER,
+  pdf_key TEXT,                                      -- dispensa PDF (R2, materials/)
   status TEXT NOT NULL DEFAULT 'draft'               -- draft | published
 );
 CREATE TABLE IF NOT EXISTS lesson_progress (

@@ -23,6 +23,13 @@ async function videoUrl(env, lessonId, who) {
   return `/api/academy/video/${lessonId}?w=${encodeURIComponent(who)}&e=${exp}&s=${sig}`;
 }
 
+async function fileUrl(env, key, who) {
+  const exp = Math.floor(Date.now() / 1000) + 4 * 3600;
+  const sig = await hmac(env.ACADEMY_SECRET, `${key}.${who}.${exp}`);
+  return `/api/academy/file?k=${encodeURIComponent(key)}&w=${encodeURIComponent(who)}&e=${exp}&s=${sig}`;
+}
+const HANDBOOKS = [[1, "materials/hdj-academy-day1.pdf"], [2, "materials/hdj-academy-day2.pdf"]];
+
 async function learner(req, env) {
   const k = req.headers.get("x-academy-key"); if (!k || k.length < 20) return null;
   const r = await env.DB.prepare(`SELECT d.id, d.full_name, d.name_latin, d.operator_id, d.academy_exam_extra, k.id AS key_id FROM academy_keys k JOIN drivers d ON d.id=k.driver_id WHERE k.key_hash=? AND k.status='active' AND d.academy_access=1`).bind(await sha256(k)).first();
@@ -69,21 +76,29 @@ export async function academyPublic(req, env, url) {
     return new Response(o.body, { headers: { ...base, "content-length": String(size) } });
   }
 
+  if (p === "/file" && M === "GET") {
+    const k = url.searchParams.get("k") || "", w = url.searchParams.get("w") || "", e = int(url.searchParams.get("e"), 0, 4e9), sg = url.searchParams.get("s") || "";
+    if (!k.startsWith("materials/") || k.includes("..") || !e || e < Date.now() / 1000 || sg !== await hmac(env.ACADEMY_SECRET, `${k}.${w}.${e}`)) return new Response("Link scaduto", { status: 403 });
+    const o = await env.ACADEMY.get(k); if (!o) return new Response("Not found", { status: 404 });
+    return new Response(o.body, { headers: { "content-type": "application/pdf", "content-disposition": `inline; filename="${k.split("/").pop()}"`, "cache-control": "private, no-store", "x-robots-tag": "noindex" } });
+  }
+
   const d = await learner(req, env);
   if (!d) return json({ ok: false, error: "unauthorized" }, 401);
   const body = M === "POST" ? await req.json().catch(() => ({})) : {};
 
   if (p === "/me" && M === "GET") {
     const lessons = (await env.DB.prepare(`SELECT l.id, l.day, l.position, l.title_ja, l.title_en, l.summary_ja, l.summary_en, l.duration_s, (l.video_key IS NOT NULL) AS has_video, COALESCE(p.watched_pct,0) AS pct, p.completed_at FROM lessons l LEFT JOIN lesson_progress p ON p.lesson_id=l.id AND p.driver_id=? WHERE l.status='published' ORDER BY l.day, l.position`).bind(d.id).all()).results;
-    return json({ ok: true, driver: { name: d.full_name, name_latin: d.name_latin }, lessons, exam: await examState(env, d) });
+    const handbooks = []; for (const [day, k] of HANDBOOKS) if (await env.ACADEMY.head(k)) handbooks.push({ day, url: await fileUrl(env, k, d.id) });
+    return json({ ok: true, driver: { name: d.full_name, name_latin: d.name_latin }, lessons, handbooks, exam: await examState(env, d) });
   }
   if ((m = p.match(/^\/lessons\/(LS-[A-Z0-9]{3,6})$/)) && M === "GET") {
-    const l = await env.DB.prepare(`SELECT id, day, position, title_ja, title_en, summary_ja, summary_en, notes_ja, notes_en, duration_s, video_key FROM lessons WHERE id=? AND status='published'`).bind(m[1]).first();
+    const l = await env.DB.prepare(`SELECT id, day, position, title_ja, title_en, summary_ja, summary_en, notes_ja, notes_en, duration_s, video_key, pdf_key FROM lessons WHERE id=? AND status='published'`).bind(m[1]).first();
     if (!l) return json({ ok: false, error: "not_found" }, 404);
     await env.DB.prepare(`INSERT OR IGNORE INTO lesson_progress (driver_id,lesson_id,max_pos_s,watched_pct,updated_at) VALUES (?,?,0,0,?)`).bind(d.id, l.id, now()).run(); // da qui parte il tempo dell'anti-salto
     const pr = await env.DB.prepare(`SELECT max_pos_s, watched_pct, completed_at FROM lesson_progress WHERE driver_id=? AND lesson_id=?`).bind(d.id, l.id).first();
-    const { video_key, ...x } = l;
-    return json({ ok: true, lesson: { ...x, video_url: video_key ? await videoUrl(env, l.id, d.id) : null }, progress: pr || { max_pos_s: 0, watched_pct: 0 } });
+    const { video_key, pdf_key, ...x } = l;
+    return json({ ok: true, lesson: { ...x, video_url: video_key ? await videoUrl(env, l.id, d.id) : null, pdf_url: pdf_key ? await fileUrl(env, pdf_key, d.id) : null }, progress: pr || { max_pos_s: 0, watched_pct: 0 } });
   }
   if (p === "/progress" && M === "POST") {
     const l = await env.DB.prepare(`SELECT id, duration_s FROM lessons WHERE id=? AND status='published'`).bind(str(body.lesson_id, 12)).first();
@@ -151,6 +166,7 @@ export async function academyAdmin(req, env, url, u, p, M, body) {
     if (!isAdmin) return deny();
     const rows = (await DB.prepare(`SELECT l.*, (SELECT COUNT(*) FROM lesson_progress p WHERE p.lesson_id=l.id AND p.completed_at IS NOT NULL) AS completions FROM lessons l ORDER BY l.day, l.position`).all()).results;
     for (const r of rows) r.preview_url = r.video_key && env.ACADEMY_SECRET ? await videoUrl(env, r.id, "ADMIN") : null;
+    for (const r of rows) r.pdf_url = r.pdf_key && env.ACADEMY_SECRET ? await fileUrl(env, r.pdf_key, "ADMIN") : null;
     return json({ ok: true, rows });
   }
   if ((p === "/academy/lessons" || (m = p.match(/^\/academy\/lessons\/(LS-[A-Z0-9]{3,6})$/))) && M === "POST") {
