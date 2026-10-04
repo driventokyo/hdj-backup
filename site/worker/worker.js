@@ -14,8 +14,21 @@ const emailOk = (e) => typeof e === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.
 const LANGS = ["ja", "zh", "en"];
 const LANG_CODES = ["en", "zh", "it", "fr", "es", "other"];
 
+// Header di sicurezza come driventokyo.com. camera=(self): la pagina di verifica legge i QR con la fotocamera.
+const SEC = { "strict-transport-security": "max-age=63072000; includeSubDomains; preload", "x-content-type-options": "nosniff", "referrer-policy": "strict-origin-when-cross-origin", "permissions-policy": "geolocation=(), microphone=(), camera=(self)", "x-frame-options": "SAMEORIGIN" };
+
 export default {
   async fetch(req, env, ctx) {
+    const res = await route(req, env, ctx);
+    const out = new Response(res.body, res);
+    for (const [k, v] of Object.entries(SEC)) out.headers.set(k, v);
+    return out;
+  },
+  async scheduled(evt, env, ctx) { ctx.waitUntil(daily(env).catch((e) => console.error("cron error", e && e.stack || e))); },
+};
+
+async function route(req, env, ctx) {
+  {
     const url = new URL(req.url);
     const p = url.pathname;
     if (url.protocol === "http:" && url.hostname.endsWith("hiredriverjapan.com")) { url.protocol = "https:"; url.hostname = url.hostname.replace(/^www\./, ""); return Response.redirect(url.toString(), 301); }
@@ -33,9 +46,8 @@ export default {
       console.error("worker error", p, e && e.stack || e);
       return json({ ok: false, error: "server_error" }, 500);
     }
-  },
-  async scheduled(evt, env, ctx) { ctx.waitUntil(daily(env).catch((e) => console.error("cron error", e && e.stack || e))); },
-};
+  }
+}
 
 // ---------------------------------------------------------------- form pubblici
 async function lead(req, env, ctx) {

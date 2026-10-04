@@ -20,6 +20,8 @@ export const CONFIG = {
   // Formazione: valori del brief, mostrati come "da", IVA esclusa
   TRAINING_PRICES: { pack6: 600000, extra: 100000, day1: 150000, lang: 40000, renewal: 20000 },
   TURNSTILE_SITEKEY: null,                  // chiave pubblica Cloudflare Turnstile: se null il widget non compare
+  GA4_ID: null,                            // es. "G-XXXXXXXXXX": se null lo script di Analytics non viene caricato
+  GSC_VERIFICATION: null,                  // codice meta di Search Console, solo se non si verifica via DNS
   PRELAUNCH: true,                         // true = noindex su tutte le pagine finche' i segnaposto non sono completati
   LANGS: ["ja", "zh", "en"],
   DEFAULT_LANG: "ja",
