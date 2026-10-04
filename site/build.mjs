@@ -6,8 +6,8 @@ import { CONFIG as C } from "./config.mjs";
 
 const OUT = path.resolve("dist");
 const LANG_META = { ja: { html: "ja", og: "ja_JP", label: "日本語" }, zh: { html: "zh-Hans", og: "zh_CN", label: "中文" }, en: { html: "en", og: "en_US", label: "English" } };
-const PAGES = ["home", "drivers", "operators", "training", "verify", "privacy"];
-const SLUG = { home: "", drivers: "drivers/", operators: "operators/", training: "training/", verify: "verify/", privacy: "privacy/" };
+const PAGES = ["home", "companies", "drivers", "training", "verify", "privacy"];
+const SLUG = { home: "", companies: "companies/", drivers: "drivers/", training: "training/", verify: "verify/", privacy: "privacy/" };
 const content = {};
 for (const l of C.LANGS) content[l] = (await import(`./content/${l}.mjs`)).default;
 
@@ -69,7 +69,7 @@ function block(b, l) {
 // Form: definizione dei campi comune, etichette per lingua
 const FORMS = {
   corporate: ["company*", "contact*", "email*", "phone", "plan", "date", "hours", "languages", "vehicle", "city*", "line", "wechat", "message", "consent*"],
-  operator: ["company*", "optype*", "city*", "fleet", "interest", "contact*", "email*", "phone", "line", "wechat", "message", "consent*"],
+  operator: ["company*", "optype*", "city*", "fleet", "interest", "languages", "contact*", "email*", "phone", "line", "wechat", "message", "consent*"],
   training: ["company*", "optype*", "drivers*", "languages", "period", "city*", "contact*", "email*", "phone", "line", "wechat", "message", "consent*"],
   driver: ["name*", "email*", "phone*", "city*", "license*", "licyears", "languages*", "langlevel", "status*", "days", "message", "consent*"],
 };
@@ -93,7 +93,7 @@ function formBlock(b, l) {
 }
 
 // Anteprima dei link (WhatsApp, LINE, Facebook, X, Slack) e icone. Cambiare OG_VER quando cambiano le immagini og: le app tengono in cache per URL.
-const OG_VER = 2;
+const OG_VER = 3;
 const ICONS = `<link rel="icon" href="/favicon.ico" sizes="48x48"><link rel="icon" href="/assets/favicon.svg" type="image/svg+xml"><link rel="icon" href="/assets/icon-96.png" type="image/png" sizes="96x96"><link rel="icon" href="/assets/icon-48.png" type="image/png" sizes="48x48"><link rel="icon" href="/assets/icon-32.png" type="image/png" sizes="32x32"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png"><link rel="manifest" href="/site.webmanifest"><meta name="theme-color" content="#14110E">`;
 const GA4 = C.GA4_ID ? `<script async src="https://www.googletagmanager.com/gtag/js?id=${C.GA4_ID}"></script><script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date());gtag("config","${C.GA4_ID}");</script>` : "";
 const GSC = C.GSC_VERIFICATION ? `<meta name="google-site-verification" content="${C.GSC_VERIFICATION}">` : "";
@@ -111,7 +111,7 @@ function jsonld(page, l, p) {
       hasCourseInstance: { "@type": "CourseInstance", courseMode: "Onsite", courseWorkload: "PT21H", location: { "@type": "Place", name: "Tokyo", address: { "@type": "PostalAddress", addressLocality: "Tokyo", addressCountry: "JP" } } },
       offers: { "@type": "Offer", category: "Paid", priceCurrency: "JPY", price: C.TRAINING_PRICES.pack6 } });
   }
-  if (page === "home") graph.push({ "@type": "Service", name: p.h1.replace(/<[^>]+>/g, ""), serviceType: "Chauffeur", areaServed: { "@type": "City", name: "Tokyo" }, provider: { "@id": C.SITE_URL + "/#org" }, description: p.meta });
+  if (page === "home" || page === "companies") graph.push({ "@type": "Service", name: p.h1.replace(/<[^>]+>/g, ""), serviceType: page === "home" ? "Multilingual professional driver for hire car operators" : "Chauffeur", areaServed: { "@type": "City", name: "Tokyo" }, provider: { "@id": C.SITE_URL + "/#org" }, description: p.meta });
   if (page !== "home") graph.push({ "@type": "BreadcrumbList", itemListElement: [
     { "@type": "ListItem", position: 1, name: C.BRAND_NAME, item: `${C.SITE_URL}/${l}/` },
     { "@type": "ListItem", position: 2, name: (content[l].nav.find(([k]) => k === page) || [, p.h1])[1].replace(/<[^>]+>/g, "").replace(/\{\{CERT\}\}/g, C.CERT_NAME), item: `${C.SITE_URL}/${l}/${SLUG[page]}` },

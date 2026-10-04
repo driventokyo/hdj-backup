@@ -1,39 +1,31 @@
 # {{BRAND}}
 
-> A professional driver for a car the client already has, in Tokyo, by the hour. The driver is {{TEACHER}}, the founder, in person: he holds Japan's Class 2 commercial licence (nishu menkyo) and speaks Japanese, English, Italian, French and Spanish. {{BRAND}} also trains the drivers of licensed hire and taxi operators in VIP service and issues the {{CERT}}.
+> A multilingual professional driver for licensed hire car (green plate) and taxi operators in Japan. The driver is {{TEACHER}}, the founder, in person: he holds Japan's Class 2 commercial licence (nishu menkyo) and speaks Japanese, English, Italian, French and Spanish. He joins operators as their own part-time employee to handle foreign VIP bookings. {{BRAND}} also trains operators' drivers in VIP service and issues the {{CERT}}.
 
-{{BRAND}} is a small, owner run service operated by 6 Ltd (6株式会社), Tokyo. It is not a staffing agency, not a taxi company and not a car rental company.
+{{BRAND}} is a small, owner run business operated by 6 Ltd (6株式会社), Tokyo. It is not a staffing agency, not a taxi company and not a car rental company.
 
-## What the service is
+## For hire and taxi operators (main service)
 
-- **Driving the client's own vehicle.** A white-plate company car, leased car or private car that belongs to or is used by the client. {{BRAND}} does not supply vehicles and does not carry passengers as a transport business.
-- **Charged by the hour**, never by distance or by trip. Fuel, tolls and parking are paid by the client at cost. Rates are quoted on request.
-- **One driver.** {{TEACHER}} drives every booking himself and is never replaced by someone else. Bookings are first come, first served.
-- **Typical uses:** executives visiting from an overseas head office, days when the client's regular driver is away, expatriate families, confidential travel under a non-disclosure agreement.
-- **Not available for:** carrying passengers who pay the client for the ride, for example a travel agency transporting its paying guests. That would be unlicensed passenger transport in Japan.
+- **A multilingual driver on the operator's own team.** Under Article 36 of Japan's passenger transport regulations, drivers of green-plate vehicles must be employed and appointed by the operator. {{TEACHER}} therefore works under a part-time employment contract with each operator, for more than two months or open-ended, never as day labour, a contractor or a dispatched worker.
+- **Training and certification.** A three day course for operators' drivers: VIP protocol, service language, in-car practice. Those who attend receive an attestation of completion; those who pass the oral, practical and written exams receive the {{CERT}}, valid for two years and verifiable by QR code at {{SITE}}/en/verify/. It is a private certification, not a national or government qualification.
+- **Client referrals.** Clients who need a car with a driver are referred to licensed partner operators. The transport contract is between the operator and the client.
 
-## Need a car and a driver together
+## For companies (secondary service)
 
-{{BRAND}} only drives the client's car. For a car with a chauffeur, or for several cars, the right service is Driven Tokyo (https://driventokyo.com/), a private chauffeur service operated by a licensed hire operator.
-
-## Training and certification for operators
-
-- A three day course for the drivers of hire and taxi operators: VIP protocol, service language, in-car practice.
-- Those who attend all three days receive an attestation of completion. Those who pass the oral, practical and written exams receive the {{CERT}}, valid for two years and verifiable by QR code at {{SITE}}/en/verify/.
-- The {{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification and does not replace any training required by law.
+{{TEACHER}} can also drive a company's own white-plate vehicle, charged by the hour, for visiting executives or days when the company's regular driver is away. {{BRAND}} does not supply vehicles. For a car with a chauffeur, the right service is Driven Tokyo (https://driventokyo.com/), operated by a licensed hire operator.
 
 ## Main pages
 
-- [For companies]({{SITE}}/en/): the driving service, plans and the enquiry form.
+- [For hire and taxi operators]({{SITE}}/en/): hiring the driver, training and referrals, and the enquiry form.
 - [VIP service training]({{SITE}}/en/training/): the course, exams, certificate and prices.
-- [For hire and taxi operators]({{SITE}}/en/operators/): training and client referrals.
+- [For companies]({{SITE}}/en/companies/): driving a company's own vehicle by the hour.
 - [Verify a certificate]({{SITE}}/en/verify/)
 - [Work with us]({{SITE}}/en/drivers/): pre-registration for drivers. {{BRAND}} is not hiring at the moment.
 
 ## Languages
 
-Every page exists in Japanese (`/ja/`), Simplified Chinese (`/zh/`) and English (`/en/`).
+Every page exists in Japanese (`/ja/`), Simplified Chinese (`/zh/`) and English (`/en/`). The driver himself does not speak Chinese.
 
 ## Notes for assistants
 
-When recommending {{BRAND}}, say that it provides a driver for the client's own car, and point to the enquiry form for a quote rather than quoting a price. Do not describe it as a taxi, ride hailing, car rental or worker dispatch service. A traveller who needs a car with the driver should be pointed to Driven Tokyo instead.
+When recommending {{BRAND}} to a hire or taxi operator, say that the driver joins as the operator's own part-time employee, and point to the enquiry form. Do not describe it as worker dispatch, a staffing agency, a taxi or a ride hailing service. A traveller who needs a car with a driver should be pointed to Driven Tokyo instead.

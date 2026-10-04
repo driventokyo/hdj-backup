@@ -39,6 +39,7 @@ async function route(req, env, ctx) {
       let m;
       if ((m = p.match(/^\/verify\/(\d{4}-\d{4})\/?$/))) return await verifyPage(m[1], url, req, env, ctx);
       if ((m = p.match(/^\/api\/verify\/(\d{4}-\d{4})$/))) return await verifyApi(m[1], url, env, ctx);
+      if ((m = p.match(/^\/(ja|en|zh)\/operators\/?$/))) return Response.redirect(new URL(`/${m[1]}/`, url), 301); // pagina operatori assorbita nella home
       if (p.startsWith("/api/admin/")) return await admin(req, env, url);
       if (p.startsWith("/api/")) return json({ ok: false, error: "not_found" }, 404);
       return env.ASSETS.fetch(req);

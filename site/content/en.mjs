@@ -7,8 +7,8 @@ export default {
     certNo: "Certificate number", verifyBtn: "Verify", verifyHint: "Certificate numbers look like 2026-0001. You can also scan the QR code the driver shows you.", scanBtn: "Scan a QR code",
     formOk: "Thank you. We will reply within two business days.", formErr: "Your message could not be sent. Please try again later or email us.", formInvalid: "Please check the required fields.", sending: "Sending…",
   },
-  nav: [["home", "For companies"], ["training", "VIP service training"], ["operators", "For hire and taxi operators"], ["drivers", "Work with us"]],
-  footerLegal: "We do not operate a passenger transport business. We provide drivers to operate vehicles owned or used by our clients. {{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification.",
+  nav: [["home", "For hire and taxi operators"], ["training", "VIP service training"], ["companies", "For companies"], ["drivers", "Work with us"]],
+  footerLegal: "We do not operate a passenger transport business. At hire and taxi operators, our driver works as their own employed and appointed driver. For companies, we provide a contracted driving service for vehicles they own or use. {{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification.",
   form: {
     fields: {
       company: { label: "Company or organisation" }, contact: { label: "Contact person" }, name: { label: "Full name" }, email: { label: "Email" }, phone: { label: "Phone" },
@@ -20,7 +20,7 @@ export default {
       consent: { label: "I agree to the handling of my personal data as described in the" },
       optype: { label: "Type of business", options: [["hire", "Hire car operator"], ["taxi", "Taxi operator"], ["yakuin", "Executive car service"], ["hotel", "Hotel"], ["dmc", "DMC or travel agency"], ["other", "Other"]] },
       fleet: { label: "Fleet size" },
-      interest: { label: "What interests you", options: [["training", "Driver training"], ["referral", "Client referrals"], ["all", "All of the above"]] },
+      interest: { label: "What interests you", options: [["driver", "Hiring a multilingual driver"], ["training", "Driver training"], ["referral", "Client referrals"], ["all", "All of the above"]] },
       drivers: { label: "Number of drivers to train" }, period: { label: "Preferred timing", ph: "e.g. January 2027" },
       license: { label: "Driving licence", options: [["nishu", "Japanese Class 2 licence (nishu menkyo)"], ["nishu_soon", "Working towards Class 2"], ["isshu", "Class 1 only"]] },
       licyears: { label: "Years of driving experience" },
@@ -31,6 +31,42 @@ export default {
   },
   pages: {
     home: {
+      title: "Multilingual Class 2 Driver for Hire and Taxi Operators in Japan | {{BRAND}}",
+      meta: "For hire and taxi operators in Japan: a driver with a Class 2 licence who speaks Japanese, English, Italian, French and Spanish joins your team part-time to handle foreign VIP bookings. Plus VIP service training and certification for your drivers.",
+      h1: "Never turn down a foreign VIP booking again.",
+      hero: { kicker: "For hire and taxi operators, Tokyo", sub: "{{TEACHER}} holds a Japanese Class 2 licence and serves guests in five languages. He joins your company as a part-time driver for your foreign clients.", photoFirst: true, img: { src: "/assets/fulvio-1100.webp", srcset: "/assets/fulvio-720.webp 720w, /assets/fulvio-1100.webp 1100w", w: 1100, h: 771, alt: "Driver {{TEACHER}}", cap: "Illustrative photo. He drives your company's vehicles." }, ctas: [{ label: "Talk about hiring", href: "#form" }, { label: "See training and certification", href: "training" }] },
+      blocks: [
+        { type: "cards", h2: "What we offer", cols: 3, items: [
+          { tag: "Available", h3: "A multilingual driver on your team", p: "Employed and appointed by you, driving your vehicles for your foreign clients. Working days agreed month by month." },
+          { tag: "Available", h3: "Driver training and certification", p: "A three-day course in VIP protocol and service language for your drivers. Those who pass receive {{CERT}}.", foot: "{{LINK:training|Training details}}" },
+          { tag: "Available", h3: "Client referrals", p: "We refer clients who need a car and a driver to licensed partner operators. The transport contract is between you and the client." },
+        ] },
+        { type: "steps", id: "how", h2: "How hiring works", items: [
+          { h3: "Talk to us", p: "Languages needed, working days, hours and the kind of bookings you expect." },
+          { h3: "Interview", p: "At your depot. You can check his driving licence and driving record certificate." },
+          { h3: "Contract and appointment", p: "A part-time employment contract for more than two months, and you appoint him as one of your drivers. Roll call, aptitude test and medical check follow your own rules." },
+          { h3: "Start driving", p: "He works around your foreign clients' bookings." },
+        ], note: "Under Article 36 of Japan's passenger transport regulations, your drivers must be employed and appointed by you. We do not accept day labour, contracts of two months or less, contractor agreements or worker dispatch." },
+        { type: "cards", h2: "Why this driver", cols: 4, items: [
+          { h3: "Class 2 licence", p: "The Japanese licence required to carry paying passengers." },
+          { h3: "Five languages", p: "Japanese, English, Italian, French and Spanish." },
+          { h3: "VVIP standard", p: "Greeting, discretion, coordination with assistants and security. He teaches the {{CERT}} course himself." },
+          { h3: "Knows Western clients", p: "Italian by birth. He knows what European and American guests expect, and what puts them off." },
+        ] },
+        { type: "profile", h2: "The driver", name: "{{TEACHER}}", photo: { ...{"src": "/assets/fulvio-portrait.webp", "w": 380, "h": 507}, alt: "Driver {{TEACHER}}" }, paras: ["An Italian based in Tokyo. He holds a Japanese Class 2 licence and has chauffeured VIP clients and hosted overseas delegations in Japanese, English, Italian, French and Spanish.", "He keeps every booking and every client confidential under your company rules. No photos, no social media.", "He also trains the drivers of hire and taxi operators for {{CERT}}."], chips: ["Italiano", "English", "日本語", "Français", "Español"], link: { page: "training", label: "About VIP service training and certification" } },
+        { type: "notice", h2: "What we do not do", paras: ["{{COMPANY}} does not carry passengers, and does not dispatch drivers or supply them under contractor agreements. Every shift at your company is driven as your own employed and appointed driver."] },
+        { type: "faq", h2: "Questions", items: [
+          { q: "How long is the contract?", a: "More than two months (we suggest three months or longer), or open-ended." },
+          { q: "Do you drive for other operators too?", a: "He may hold part-time contracts with more than one operator. Working days are agreed month by month so they never overlap, and working hours are counted together across employers." },
+          { q: "How is the hourly wage set?", a: "We agree it with you based on hours, languages and the kind of bookings." },
+          { q: "Can he drive on days without foreign clients?", a: "Yes. Working days are agreed each month and he drives whatever bookings you have that day." },
+          { q: "Can we book the training only?", a: "Yes. You can book training and certification for your own drivers on its own." },
+          { q: "Do referrals carry a fee?", a: "Referral terms are agreed case by case with each partner." },
+        ] },
+        { type: "form", id: "form", form: "operator", h2: "Talk to us", intro: "Tell us what interests you. We will reply within two business days.", submit: "Send" },
+      ],
+    },
+    companies: {
       title: "Private Multilingual Driver for Your Car in Tokyo | {{BRAND}}",
       meta: "A driver with Japan's Class 2 commercial licence who speaks Japanese, English, Italian, French and Spanish drives your company or executive car by the hour. For visiting executives, VIP guests and days your own driver is away.",
       h1: "A professional driver for your own car, in five languages.",
@@ -91,24 +127,6 @@ export default {
           "You can ask us to delete your registration at any time.",
         ] },
         { type: "form", id: "form", form: "driver", h2: "Pre-registration form", intro: "We will read your details and contact you when relevant.", submit: "Pre-register" },
-      ],
-    },
-    operators: {
-      title: "For Hire Car and Taxi Operators in Japan | {{BRAND}}",
-      meta: "Help for licensed hire and taxi operators who turn down foreign VIP bookings: three-day driver training with {{CERT}}, and referrals of clients who need a car with a driver.",
-      h1: "Stop turning down foreign VIP bookings.",
-      hero: { kicker: "For licensed hire and taxi operators", sub: "You have the cars and the licence. What you lack is a driver who can look after a foreign VIP. That is where we come in.", ctas: [{ label: "Talk to us", href: "#form" }, { label: "See the training", href: "training" }] },
-      blocks: [
-        { type: "cards", h2: "What we offer", cols: 2, items: [
-          { tag: "Available", h3: "Driver training and certification", p: "A three-day course in VIP protocol and service language for your drivers. Those who pass receive {{CERT}}.", foot: "{{LINK:training|Training details}}" },
-          { tag: "Available", h3: "Client referrals", p: "We refer clients who need a car and a driver to licensed partner operators. The transport contract is between you and the client." },
-        ] },
-        { type: "notice", h2: "What we do not do", paras: ["We do not carry passengers, and we neither dispatch nor place drivers with operators. Your drivers must be people you appoint and employ yourselves."] },
-        { type: "faq", h2: "Questions", items: [
-          { q: "Can you train at our depot?", a: "Yes. Classroom and in-car sessions can take place at your depot with your vehicles, or we can book a room in Tokyo." },
-          { q: "Do referrals carry a fee?", a: "Referral terms are agreed case by case with each partner." },
-        ] },
-        { type: "form", id: "form", form: "operator", h2: "Enquiries", intro: "Tell us what interests you and we will be in touch.", submit: "Send" },
       ],
     },
     training: {

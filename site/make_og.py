@@ -14,9 +14,9 @@ SERIF_EN = ["/System/Library/Fonts/Supplemental/Didot.ttc", "/System/Library/Fon
 JA = ["/System/Library/Fonts/ヒラギノ明朝 ProN.ttc", "/System/Library/Fonts/ヒラギノ角ゴシック W6.ttc"]
 ZH = ["/System/Library/Fonts/Supplemental/Songti.ttc", "/System/Library/Fonts/PingFang.ttc"]
 SANS_JA = ["/System/Library/Fonts/ヒラギノ角ゴシック W3.ttc"]; SANS_ZH = ["/System/Library/Fonts/PingFang.ttc"]; SANS_EN = ["/System/Library/Fonts/HelveticaNeue.ttc"]
-TXT = {"ja": ("5か国語で接客する\n二種免許ドライバーが、御社の車を。", "役員運転手・専属運転手を時間単位で｜VIPサービス研修と認証", JA, SANS_JA),
-       "zh": ("会五种语言的二种驾照司机，\n驾驶贵公司的车。", "东京专职司机按小时服务｜贵宾服务培训与认证", ZH, SANS_ZH),
-       "en": ("A licensed driver for your\nown car, in five languages.", "Private and executive driver by the hour, Tokyo  |  VIP service training", SERIF_EN, SANS_EN)}
+TXT = {"ja": ("外国人VIPのご依頼を、\n断らずに済む乗務員を。", "ハイヤー・タクシー事業者さまへ｜5か国語・第二種免許｜VIP研修と認証", JA, SANS_JA),
+       "zh": ("外国贵宾的订单，\n不必再推掉。", "致包车与出租车公司｜五种语言・二种驾照｜贵宾培训与认证", ZH, SANS_ZH),
+       "en": ("A multilingual Class 2\ndriver for your hire fleet.", "For hire and taxi operators in Japan  |  Five languages  |  VIP training", SERIF_EN, SANS_EN)}
 def mark(d, x, y, s):
     k = s / 64
     d.polygon([(x+a*k, y+b*k) for a, b in [(20,3),(44,3),(61,20),(61,44),(44,61),(20,61),(3,44),(3,20)]], outline=GOLD, width=3)
@@ -29,4 +29,4 @@ for l, (h, s, fh, fs) in TXT.items():
     d.line([(80, 200), (116, 200)], fill=GOLD, width=2)
     d.multiline_text((80, 230), h, font=font(fh, 60 if l != "en" else 66), fill=IVORY, spacing=20)
     d.text((80, 512), s, font=font(fs, 26), fill=MUT)
-    im.save(f"src/assets/og-{l}-2.png", optimize=True); print("og", l)
+    im.save(f"src/assets/og-{l}-3.png", optimize=True); print("og", l)
