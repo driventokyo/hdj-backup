@@ -54,7 +54,7 @@ function login(){$("#tabs").innerHTML="";$("#who").textContent="";
 
 const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
 const TABS_TEACHER=[["courses","Le mie sessioni"]];
-const TABS_OPERATOR=[["refs","紹介案件"],["stmts","請求書"],["certs","乗務員の認証"]];
+const TABS_OPERATOR=[["refs","案件ボード"],["stmts","請求書"],["certs","乗務員の認証"]];
 async function start(){
   const tabs=ME.role==="admin"?TABS_ADMIN:ME.role==="teacher"?TABS_TEACHER:TABS_OPERATOR;
   $("#ptitle").textContent=ME.role==="operator"?"提携事業者さま専用画面":"pannello";
@@ -63,7 +63,7 @@ async function start(){
   $("#tabs").onclick=e=>{const b=e.target.closest("button");if(b)show(b.dataset.t)};
   show(tabs[0][0]);counts();setInterval(counts,60000);
 }
-async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}document.title=(n?`(${n}) `:"")+"Pannello · HIRE driver japan"}catch(_){}}
+async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}const o=$("#c-refs");if(o&&ME.role==="operator"){o.hidden=!c.open_jobs;o.textContent=c.open_jobs}document.title=(ME.role==="operator"?(c.open_jobs?`(${c.open_jobs}) `:"")+"案件ボード":(n?`(${n}) `:"")+"Pannello")+" · HIRE driver japan"}catch(_){}}
 function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
 
 // ---- Richieste: pipeline
@@ -83,7 +83,7 @@ function leadDlg(r){
   <div class="row"><label>Stato<select id="ds">${STAGES[leadKind].map(s=>`<option value="${s}"${s===r.stage?" selected":""}>${SLAB[s]}</option>`).join("")}</select></label>
   ${leadKind!=="driver"?`<label>Preventivo (yen, IVA esclusa)<input id="dq" type="number" value="${r.quote_jpy??""}"></label><label>Motivo perdita<input id="dl" value="${esc(r.lost_reason||"")}"></label>`:""}</div>
   <label style="font-size:12px;color:#5b6875">Note interne<textarea id="dn" rows="3">${esc(r.notes||"")}</textarea></label>
-  <p class="row"><button class="b" id="dsave">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${leadKind==="service"?`<button class="b s" id="mkref">Segnala a un'azienda</button>`:""}${leadKind==="driver"&&r.stage==="hired"&&!r.driver_id?`<button class="b s" id="mkdrv">Crea scheda autista</button>`:""}</p>`;
+  <p class="row"><button class="b" id="dsave">Salva</button><button class="b s" onclick="dlg.close()">Chiudi</button>${leadKind==="service"?`<button class="b s" id="mkref">Invia ai membri</button>`:""}${leadKind==="driver"&&r.stage==="hired"&&!r.driver_id?`<button class="b s" id="mkdrv">Crea scheda autista</button>`:""}</p>`;
   dlg.showModal();
   $("#dsave").onclick=async()=>{const b={stage:$("#ds").value,notes:$("#dn").value};if(leadKind!=="driver"){b.quote_jpy=$("#dq").value;b.lost_reason=$("#dl").value}await api(`/leads/${leadKind}/${r.id}`,b);dlg.close();toast("Salvato");leads();counts()};
   const rf=$("#mkref");if(rf)rf.onclick=()=>{dlg.close();PREF={lead_id:r.id,client_name:r.contact_name,client_company:r.company,client_email:r.email,client_phone:r.phone,client_lang:r.site_lang,service_date:r.service_date,request:[r.plan,r.hours?r.hours+"h":"",r.vehicle,r.city,r.message].filter(Boolean).join(" · ")};show("refs")};
@@ -180,29 +180,42 @@ async function users(){await loadPeople();const rows=(await api("/users")).rows;
 // ---- Segnalazioni alle aziende partner (admin in italiano, azienda in giapponese)
 let PREF=null;
 const yen=n=>n==null||n===""?"":"¥"+Number(n).toLocaleString("ja-JP");
-const RST={sent:["Inviata","紹介済み"],contacted:["Contattata","連絡済み"],booked:["Prenotata","予約確定"],completed:["Conclusa","完了"],lost:["Persa","不成立"]};
+const RST={open:["Aperto a tutti","募集中"],accepted:["Preso","引き受け済み"],contacted:["Contattato","連絡済み"],booked:["Prenotato","予約確定"],completed:["Concluso","完了"],lost:["Perso","不成立"],cancelled:["Ritirato","取り下げ"]};
 const isOpUI=()=>ME.role==="operator";
 const rl=k=>RST[k]?RST[k][isOpUI()?1:0]:k;
-async function refs(){
-  if(!isOpUI())await loadPeople();
+async function refs(){ return isOpUI()?refsOp():refsAdmin() }
+async function refsAdmin(){
+  await loadPeople();
   const rows=(await api("/referrals")).rows;
   const f=PREF||{};PREF=null;
-  const form=isOpUI()?`<p style="color:#5b6875">HIRE driver japanからご紹介したお客さまです。お見積り、ご契約、運賃のお受け取りは御社とお客さまの間で行ってください。ご利用が完了したら「完了」にして、ご請求額（税抜）とご利用日を入力してください。月末に紹介料をまとめてご請求します。</p>`:
-  `<div class="panel"><h3>Nuova segnalazione</h3><p style="color:#5b6875;margin-top:0">Presenti soltanto il cliente: niente preventivi, prezzi o incassi da parte nostra. Preventivo, contratto e pagamento sono tra l'azienda e il cliente.</p>
-  <div class="row"><label>Azienda partner<select id="ro">${OPS.filter(o=>o.status!=="inactive").map(o=>`<option value="${o.id}">${esc(o.name)} (${Math.round((o.fee_rate??0.1)*100)}%)</option>`).join("")}</select></label><label>Cliente (nome)<input id="rn" value="${esc(f.client_name||"")}"></label><label>Società cliente<input id="rc" value="${esc(f.client_company||"")}"></label><label>Email<input id="re" value="${esc(f.client_email||"")}"></label><label>Telefono<input id="rp" value="${esc(f.client_phone||"")}"></label><label>Lingua<input id="rlg" value="${esc(f.client_lang||"")}"></label><label>Data/periodo richiesto<input id="rd" value="${esc(f.service_date||"")}"></label></div>
-  <label style="font-size:12px;color:#5b6875">Cosa chiede il cliente (senza prezzi)<textarea id="rq" rows="2">${esc(f.request||"")}</textarea></label>
-  <div class="row"><label>Data del consenso del cliente a passare i dati<input id="rcs" type="date"></label><label>Nota interna<input id="rn2"></label><button class="b" id="rsave">Segnala</button></div><input type="hidden" id="rlead" value="${esc(f.lead_id||"")}"></div>`;
-  const H=isOpUI()?["番号","受付日","お客さま","ご連絡先","ご希望","状況","ご利用日","ご請求額（税抜）","紹介料","メモ",""]:["N.","Data","Azienda","Cliente","Contatti","Richiesta","Stato","Servizio","Fatturato (IVA escl.)","Provvigione","Estratto",""];
-  app.innerHTML=form+`<table id="rt"><tr>${H.map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>{const lock=!!r.statement_id;
-    const stSel=`<select data-f="status"${lock?" disabled":""}>${Object.keys(RST).map(k=>`<option value="${k}"${k===r.status?" selected":""}>${rl(k)}</option>`).join("")}</select>`;
-    const done=`<input type="date" data-f="completed_at" value="${esc(r.completed_at||"")}"${lock?" disabled":""}>`;
-    const rev=`<input type="number" min="0" data-f="revenue_jpy" value="${r.revenue_jpy??""}" style="width:110px"${lock?" disabled":""}>`;
-    const note=`<input data-f="${isOpUI()?"operator_note":"admin_note"}" value="${esc(isOpUI()?r.operator_note||"":r.admin_note||"")}">`;
-    const contact=[r.client_email,r.client_phone,r.client_lang].filter(Boolean).map(esc).join("<br>");
-    return isOpUI()?`<tr data-id="${r.id}"><td>${r.id}</td><td>${d10(r.created_at)}</td><td>${esc(r.client_company||"")}<br>${esc(r.client_name)}</td><td>${contact}</td><td>${esc(r.service_date||"")}<br><small>${esc(r.request||"")}</small></td><td>${stSel}</td><td>${done}</td><td>${rev}</td><td>${yen(r.fee_jpy)}</td><td>${note}</td><td>${lock?`<small>${esc(r.statement_id)}</small>`:`<button class="b s" data-sv>保存</button>`}</td></tr>`
-    :`<tr data-id="${r.id}"><td>${r.id}</td><td>${d10(r.created_at)}</td><td>${esc(r.operator_name)}</td><td>${esc(r.client_company||"")}<br>${esc(r.client_name)}</td><td>${contact}</td><td>${esc(r.service_date||"")}<br><small>${esc(r.request||"")}</small>${r.operator_note?`<br><small>Nota azienda: ${esc(r.operator_note)}</small>`:""}</td><td>${stSel}</td><td>${done}</td><td>${rev}</td><td>${yen(r.fee_jpy)} <small>${Math.round(r.fee_rate*100)}%</small></td><td>${esc(r.statement_id||"")}</td><td>${note} <button class="b s" data-sv>Salva</button></td></tr>`}).join("")||`<tr><td colspan="12">${isOpUI()?"ご紹介した案件はまだありません。":"Nessuna segnalazione."}</td></tr>`}</table>`;
-  const rs=$("#rsave");if(rs)rs.onclick=async()=>{const j=await api("/referrals",{operator_id:$("#ro").value,lead_id:$("#rlead").value||null,client_name:$("#rn").value,client_company:$("#rc").value,client_email:$("#re").value,client_phone:$("#rp").value,client_lang:$("#rlg").value,service_date:$("#rd").value,request:$("#rq").value,consent_at:$("#rcs").value,admin_note:$("#rn2").value});toast("Segnalazione "+j.id+" creata. Avvisa l'azienda: la vede nel suo pannello.");refs()};
-  app.querySelectorAll("[data-sv]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr"),o={};tr.querySelectorAll("[data-f]").forEach(i=>{if(!i.disabled)o[i.dataset.f]=i.value});const j=await api("/referrals/"+tr.dataset.id,o);toast((isOpUI()?"保存しました":"Salvato")+(j.fee_jpy!=null?" · "+yen(j.fee_jpy):""));refs()});
+  app.innerHTML=`<div class="panel"><h3>Nuovo lavoro da inviare</h3><p style="color:#5b6875;margin-top:0">Presenti soltanto il cliente: niente preventivi, prezzi o incassi da parte nostra. I membri vedono subito solo la parte "Lavoro", senza nomi; nome e contatti del cliente li vede solo chi accetta.</p>
+  <h4 style="margin:6px 0">Lavoro (visibile a tutti i membri, senza nomi)</h4>
+  <div class="row"><label>Titolo<input id="jt" placeholder="es. Alphard, aeroporto Haneda → Ginza" value=""></label><label>Data/orario<input id="jd" value="${esc(f.service_date||"")}"></label><label>Zona<input id="ja" value=""></label><label>Lingue richieste<input id="jl" placeholder="英語, イタリア語" value=""></label></div>
+  <label style="font-size:12px;color:#5b6875">Dettagli del lavoro (passeggeri, bagagli, ore, veicolo; niente nomi)<textarea id="jx" rows="2"></textarea></label>
+  <h4 style="margin:12px 0 6px">Cliente (solo per chi accetta)</h4>
+  <div class="row"><label>Nome<input id="rn" value="${esc(f.client_name||"")}"></label><label>Societa'<input id="rc" value="${esc(f.client_company||"")}"></label><label>Email<input id="re" value="${esc(f.client_email||"")}"></label><label>Telefono<input id="rp" value="${esc(f.client_phone||"")}"></label><label>Lingua<input id="rlg" value="${esc(f.client_lang||"")}"></label></div>
+  <label style="font-size:12px;color:#5b6875">Richiesta completa<textarea id="rq" rows="2">${esc(f.request||"")}</textarea></label>
+  <div class="row"><label>Consenso del cliente a passare i dati (data)<input id="rcs" type="date"></label><label>Invia a<select id="ro"><option value="">Tutti i membri (il primo che accetta)</option>${OPS.filter(o=>o.status!=="inactive").map(o=>`<option value="${o.id}">Solo ${esc(o.name)} (${Math.round((o.fee_rate??0.1)*100)}%)</option>`).join("")}</select></label><label>Nota interna<input id="rn2"></label><button class="b" id="rsave">Invia</button></div><input type="hidden" id="rlead" value="${esc(f.lead_id||"")}"></div>
+  <table><tr>${["N.","Data","Lavoro","Cliente","Stato","Membro","Servizio","Fatturato (IVA escl.)","Provvigione","Estratto",""].map(h=>`<th>${h}</th>`).join("")}</tr>${rows.map(r=>{const lock=!!r.statement_id;
+    return `<tr data-id="${r.id}"><td>${r.id}</td><td>${d10(r.created_at)}</td><td><b>${esc(r.job_title)}</b><br><small>${esc([r.service_date,r.area,r.job_langs].filter(Boolean).join(" · "))}</small></td><td>${esc(r.client_company||"")} ${esc(r.client_name)}<br><small>${esc([r.client_email,r.client_phone].filter(Boolean).join(" · "))}</small>${r.operator_note?`<br><small>Nota membro: ${esc(r.operator_note)}</small>`:""}</td>
+    <td><select data-f="status"${lock?" disabled":""}>${Object.keys(RST).filter(k=>r.operator_id?k!=="open":["open","cancelled"].includes(k)).map(k=>`<option value="${k}"${k===r.status?" selected":""}>${rl(k)}</option>`).join("")}</select></td><td>${esc(r.operator_name||"—")}${r.accepted_at?`<br><small>${d10(r.accepted_at)}</small>`:""}</td>
+    <td><input type="date" data-f="completed_at" value="${esc(r.completed_at||"")}"${lock||!r.operator_id?" disabled":""}></td><td><input type="number" min="0" data-f="revenue_jpy" value="${r.revenue_jpy??""}" style="width:110px"${lock||!r.operator_id?" disabled":""}></td><td>${yen(r.fee_jpy)}${r.fee_rate!=null?` <small>${Math.round(r.fee_rate*100)}%</small>`:""}</td><td>${esc(r.statement_id||"")}</td>
+    <td><input data-f="admin_note" value="${esc(r.admin_note||"")}" placeholder="nota"> <button class="b s" data-sv>Salva</button>${r.operator_id&&!lock?` <button class="b s" data-reopen>Riapri a tutti</button>`:""}</td></tr>`}).join("")||`<tr><td colspan="11">Nessun lavoro.</td></tr>`}</table>`;
+  $("#rsave").onclick=async()=>{const j=await api("/referrals",{job_title:$("#jt").value,service_date:$("#jd").value,area:$("#ja").value,job_langs:$("#jl").value,job_details:$("#jx").value,client_name:$("#rn").value,client_company:$("#rc").value,client_email:$("#re").value,client_phone:$("#rp").value,client_lang:$("#rlg").value,request:$("#rq").value,consent_at:$("#rcs").value,operator_id:$("#ro").value||null,lead_id:$("#rlead").value||null,admin_note:$("#rn2").value});toast(j.status==="open"?`Lavoro ${j.id} inviato a tutti i membri`:`Lavoro ${j.id} assegnato`);refs()};
+  app.querySelectorAll("[data-sv]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr"),o={};tr.querySelectorAll("[data-f]").forEach(i=>{if(!i.disabled)o[i.dataset.f]=i.value});await api("/referrals/"+tr.dataset.id,o);toast("Salvato");refs()});
+  app.querySelectorAll("[data-reopen]").forEach(b=>b.onclick=async()=>{if(!confirm("Togliere il lavoro al membro e rimetterlo in bacheca per tutti?"))return;await api("/referrals/"+b.closest("tr").dataset.id,{reopen:true});toast("Riaperto a tutti");refs()});
+}
+async function refsOp(){
+  const rows=(await api("/referrals")).rows;
+  const board=rows.filter(r=>r.view!=="mine"), mine=rows.filter(r=>r.view==="mine");
+  const card=r=>`<div class="it" style="${r.view==="taken"?"opacity:.5;cursor:default;background:#f1f2f4":"cursor:default"}"><div class="t">${esc(r.job_title)}</div><small>${esc(r.id)} · ${d10(r.created_at)}</small><br><small>${esc([r.service_date,r.area,r.job_langs].filter(Boolean).join(" · "))}</small>${r.job_details?`<p style="margin:6px 0">${esc(r.job_details)}</p>`:""}${r.view==="open"?`<button class="b" data-acc="${r.id}">引き受ける</button>`:`<p style="margin:6px 0 0;color:#a1281f;font-weight:600">他の提携事業者が引き受けました</p>`}</div>`;
+  app.innerHTML=`<p style="color:#5b6875">HIRE driver japanからの案件です。最初に「引き受ける」を押した事業者さまが担当になり、お客さまのお名前とご連絡先が表示されます。お見積り、ご契約、運賃のお受け取りは御社とお客さまの間で行ってください。</p>
+  <h3>案件ボード</h3><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px">${board.map(card).join("")||'<p>現在、募集中の案件はありません。</p>'}</div>
+  <h3>引き受けた案件</h3><p style="color:#5b6875;margin-top:0">ご利用が完了したら「完了」にして、ご請求額（税抜）とご利用日を入力してください。月末に紹介料をまとめてご請求します。</p>
+  <table><tr>${["番号","案件","お客さま","ご連絡先","状況","ご利用日","ご請求額（税抜）","紹介料","メモ",""].map(h=>`<th>${h}</th>`).join("")}</tr>${mine.map(r=>{const lock=!!r.statement_id;return `<tr data-id="${r.id}"><td>${r.id}</td><td><b>${esc(r.job_title)}</b><br><small>${esc([r.service_date,r.area,r.job_langs].filter(Boolean).join(" · "))}</small>${r.request?`<br><small>${esc(r.request)}</small>`:""}</td><td>${esc(r.client_company||"")}<br>${esc(r.client_name)}</td><td>${esc([r.client_email,r.client_phone,r.client_lang].filter(Boolean).join(" · "))}</td>
+  <td><select data-f="status"${lock?" disabled":""}>${["accepted","contacted","booked","completed","lost"].map(k=>`<option value="${k}"${k===r.status?" selected":""}>${rl(k)}</option>`).join("")}</select></td><td><input type="date" data-f="completed_at" value="${esc(r.completed_at||"")}"${lock?" disabled":""}></td><td><input type="number" min="0" data-f="revenue_jpy" value="${r.revenue_jpy??""}" style="width:110px"${lock?" disabled":""}></td><td>${yen(r.fee_jpy)}</td><td><input data-f="operator_note" value="${esc(r.operator_note||"")}"${lock?" disabled":""}></td><td>${lock?`<small>${esc(r.statement_id)}</small>`:`<button class="b s" data-sv>保存</button>`}</td></tr>`}).join("")||'<tr><td colspan="10">まだありません。</td></tr>'}</table>`;
+  app.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{if(!confirm("この案件を引き受けますか？引き受けると、お客さまのご連絡先が表示されます。"))return;try{await api(`/referrals/${b.dataset.acc}/accept`,{});toast("引き受けました。お客さまへのご連絡をお願いします。")}catch(_){}refs();counts()});
+  app.querySelectorAll("[data-sv]").forEach(b=>b.onclick=async()=>{const tr=b.closest("tr"),o={};tr.querySelectorAll("[data-f]").forEach(i=>{if(!i.disabled)o[i.dataset.f]=i.value});const j=await api("/referrals/"+tr.dataset.id,o);toast("保存しました"+(j.fee_jpy!=null?" · 紹介料 "+yen(j.fee_jpy):""));refs()});
 }
 async function openInvoice(id){const r=await fetch(`/api/admin/statements/${id}/invoice`,{headers:{"x-panel-token":TOKEN}});if(!r.ok){toast("Errore");return}const h=await r.text();const w=window.open("","_blank");if(!w){toast("Consenti i popup");return}w.document.write(h);w.document.close()}
 async function stmts(){

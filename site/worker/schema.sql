@@ -133,19 +133,20 @@ CREATE TABLE IF NOT EXISTS renewals (
 
 CREATE TABLE IF NOT EXISTS referrals (
   id TEXT PRIMARY KEY, created_at TEXT NOT NULL, updated_at TEXT NOT NULL,
-  operator_id TEXT NOT NULL REFERENCES operators(id),
-  lead_id TEXT,                                      -- richiesta del sito da cui nasce, se c'e'
-  client_name TEXT NOT NULL, client_company TEXT, client_email TEXT, client_phone TEXT, client_lang TEXT,
-  service_date TEXT, request TEXT,                   -- cosa chiede il cliente, senza prezzi
-  consent_at TEXT NOT NULL,                          -- data del consenso del cliente a passare i dati all'azienda
-  status TEXT NOT NULL DEFAULT 'sent',               -- sent | contacted | booked | completed | lost
-  completed_at TEXT,                                 -- data del servizio concluso (determina il mese dell'estratto)
-  revenue_jpy INTEGER,                               -- fatturato dell'azienda al cliente, IVA esclusa, dichiarato dall'azienda
-  fee_rate REAL NOT NULL,                            -- fotografia della percentuale al momento della segnalazione
-  fee_jpy INTEGER,
-  statement_id TEXT,                                 -- una volta in un estratto non si modifica piu'
-  operator_note TEXT, admin_note TEXT
+  operator_id TEXT REFERENCES operators(id),         -- NULL finche' il lavoro e' aperto
+  lead_id TEXT,
+  -- visibile a tutti i partner
+  job_title TEXT NOT NULL, service_date TEXT, area TEXT, job_langs TEXT, job_details TEXT,
+  -- visibile solo a chi prende il lavoro
+  client_name TEXT NOT NULL, client_company TEXT, client_email TEXT, client_phone TEXT, client_lang TEXT, request TEXT,
+  consent_at TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'open',               -- open | accepted | contacted | booked | completed | lost | cancelled
+  accepted_at TEXT, accepted_by TEXT,                -- utente del pannello che ha accettato
+  completed_at TEXT, revenue_jpy INTEGER,
+  fee_rate REAL, fee_jpy INTEGER,                    -- fee_rate fotografata al momento dell'accettazione
+  statement_id TEXT, operator_note TEXT, admin_note TEXT
 );
+CREATE INDEX IF NOT EXISTS idx_ref_status ON referrals(status, created_at);
 CREATE INDEX IF NOT EXISTS idx_ref_op ON referrals(operator_id, status, completed_at);
 
 CREATE TABLE IF NOT EXISTS statements (

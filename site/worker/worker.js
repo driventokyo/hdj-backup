@@ -199,6 +199,7 @@ async function admin(req, env, url) {
   }
   if (p === "/counts" && M === "GET") {
     const r = await DB.prepare(`SELECT (SELECT COUNT(*) FROM leads_service WHERE stage='new') AS service,(SELECT COUNT(*) FROM leads_training WHERE stage='new') AS training,(SELECT COUNT(*) FROM driver_applications WHERE stage='new') AS driver,(SELECT COUNT(*) FROM certificates WHERE status='active' AND expires_at<=date('now','+60 day')) AS expiring`).first();
+    if (!isAdmin && u.role === "operator") { const o = await DB.prepare(`SELECT COUNT(*) AS n FROM referrals WHERE status='open'`).first(); return json({ ok: true, counts: { expiring: r.expiring, open_jobs: o.n } }); }
     return json({ ok: true, counts: isAdmin ? r : { expiring: r.expiring } });
   }
 
@@ -351,7 +352,7 @@ async function admin(req, env, url) {
   }
 
   // ---- segnalazioni alle aziende partner (provvigione sul fatturato al cliente)
-  const REF_ST = ["sent", "contacted", "booked", "completed", "lost"];
+  const REF_ST = ["open", "accepted", "contacted", "booked", "completed", "lost", "cancelled"];
   const isOp = u.role === "operator" && u.operator_id;
   if ((m = p.match(/^\/operators\/(OP-[A-Z0-9]{6})$/)) && M === "POST") {
     if (!isAdmin) return deny();
@@ -362,45 +363,61 @@ async function admin(req, env, url) {
     await DB.prepare(`UPDATE operators SET ${Object.keys(f).map((k) => k + "=?").join(",")}, updated_at=? WHERE id=?`).bind(...Object.values(f), now(), m[1]).run();
     return json({ ok: true });
   }
+  const PUB = ["id", "created_at", "job_title", "service_date", "area", "job_langs", "job_details"];
   if (p === "/referrals" && M === "GET") {
     if (!isAdmin && !isOp) return deny();
-    const per = url.searchParams.get("period");
-    const w = [], v = [];
-    if (!isAdmin) { w.push("r.operator_id=?"); v.push(u.operator_id); }
-    if (per && /^\d{4}-\d{2}$/.test(per)) { w.push("(substr(r.completed_at,1,7)=? OR substr(r.created_at,1,7)=?)"); v.push(per, per); }
-    const q = `SELECT r.*, o.name AS operator_name FROM referrals r JOIN operators o ON o.id=r.operator_id ${w.length ? "WHERE " + w.join(" AND ") : ""} ORDER BY r.created_at DESC LIMIT 1000`;
-    const rows = (await DB.prepare(q).bind(...v).all()).results;
-    return json({ ok: true, rows: isAdmin ? rows : rows.map(({ admin_note, ...x }) => x) });
+    if (isAdmin) return json({ ok: true, rows: (await DB.prepare(`SELECT r.*, o.name AS operator_name FROM referrals r LEFT JOIN operators o ON o.id=r.operator_id ORDER BY r.created_at DESC LIMIT 1000`).all()).results });
+    // partner: lavori aperti (dati anonimi), i propri (completi), quelli presi da altri negli ultimi 30 giorni (anonimi, senza dire chi)
+    const rows = (await DB.prepare(`SELECT * FROM referrals WHERE status='open' OR operator_id=? OR (status NOT IN ('open','cancelled') AND accepted_at>=datetime('now','-30 day')) ORDER BY created_at DESC LIMIT 500`).bind(u.operator_id).all()).results;
+    return json({ ok: true, rows: rows.map((r) => {
+      if (r.operator_id === u.operator_id) { const { admin_note, accepted_by, ...x } = r; return { ...x, view: "mine" }; }
+      const x = Object.fromEntries(PUB.map((k) => [k, r[k]]));
+      return { ...x, view: r.status === "open" ? "open" : "taken" };
+    }) });
   }
   if (p === "/referrals" && M === "POST") {
     if (!isAdmin) return deny();
-    const op = await DB.prepare(`SELECT id, fee_rate FROM operators WHERE id=? AND status='active'`).bind(str(body.operator_id, 20)).first();
-    if (!op) return json({ ok: false, error: "operator_not_found" }, 404);
-    if (!str(body.client_name)) return json({ ok: false, error: "missing_fields", hint: "Nome del cliente obbligatorio" }, 400);
-    if (!str(body.consent_at, 30)) return json({ ok: false, error: "consent_missing", hint: "Serve la data del consenso del cliente a passare i suoi dati all'azienda (privacy)." }, 400);
+    if (!str(body.job_title) || !str(body.client_name)) return json({ ok: false, error: "missing_fields", hint: "Servono il titolo del lavoro e il nome del cliente." }, 400);
+    if (!str(body.consent_at, 30)) return json({ ok: false, error: "consent_missing", hint: "Serve la data del consenso del cliente a passare i suoi dati all'azienda che prendera' il lavoro (privacy)." }, 400);
+    let op = null;
+    if (body.operator_id) { op = await DB.prepare(`SELECT id, fee_rate FROM operators WHERE id=? AND status='active'`).bind(str(body.operator_id, 20)).first(); if (!op) return json({ ok: false, error: "operator_not_found" }, 404); }
     const id = rid("RF"), t = now();
-    await DB.prepare(`INSERT INTO referrals (id,created_at,updated_at,operator_id,lead_id,client_name,client_company,client_email,client_phone,client_lang,service_date,request,consent_at,fee_rate,admin_note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
-      .bind(id, t, t, op.id, str(body.lead_id, 20), str(body.client_name), str(body.client_company), str(body.client_email), str(body.client_phone, 40), str(body.client_lang, 10), str(body.service_date, 60), str(body.request, 2000), str(body.consent_at, 30), op.fee_rate, str(body.admin_note, 2000)).run();
-    return json({ ok: true, id });
+    await DB.prepare(`INSERT INTO referrals (id,created_at,updated_at,operator_id,lead_id,job_title,service_date,area,job_langs,job_details,client_name,client_company,client_email,client_phone,client_lang,request,consent_at,status,accepted_at,fee_rate,admin_note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(id, t, t, op ? op.id : null, str(body.lead_id, 20), str(body.job_title), str(body.service_date, 60), str(body.area), str(body.job_langs, 100), str(body.job_details, 2000), str(body.client_name), str(body.client_company), str(body.client_email), str(body.client_phone, 40), str(body.client_lang, 10), str(body.request, 2000), str(body.consent_at, 30), op ? "accepted" : "open", op ? t : null, op ? op.fee_rate : null, str(body.admin_note, 2000)).run();
+    return json({ ok: true, id, status: op ? "accepted" : "open" });
+  }
+  if ((m = p.match(/^\/referrals\/(RF-[A-Z0-9]{6})\/accept$/)) && M === "POST") {
+    if (!isOp) return deny();
+    const t = now();
+    // una sola UPDATE condizionata: se due partner accettano insieme, solo uno la vince
+    const r = await DB.prepare(`UPDATE referrals SET operator_id=?, status='accepted', accepted_at=?, accepted_by=?, fee_rate=(SELECT fee_rate FROM operators WHERE id=?), updated_at=? WHERE id=? AND status='open' AND operator_id IS NULL`).bind(u.operator_id, t, u.id, u.operator_id, t, m[1]).run();
+    if (!r.meta.changes) return json({ ok: false, error: "taken", hint: "この案件は、ほかの提携事業者が引き受けました。" }, 409);
+    return json({ ok: true });
   }
   if ((m = p.match(/^\/referrals\/(RF-[A-Z0-9]{6})$/)) && M === "POST") {
     const r = await DB.prepare(`SELECT * FROM referrals WHERE id=?`).bind(m[1]).first();
     if (!r) return json({ ok: false, error: "not_found" }, 404);
     if (!isAdmin && !(isOp && r.operator_id === u.operator_id)) return deny();
     if (r.statement_id && !isAdmin) return json({ ok: false, error: "locked", hint: "請求書に含まれた案件は変更できません。" }, 409);
-    if (r.statement_id && ("revenue_jpy" in body || "completed_at" in body || "status" in body)) return json({ ok: false, error: "locked", hint: "Segnalazione gia' in un estratto conto: annulla l'estratto prima di cambiare importi o date." }, 409);
+    if (r.statement_id && ("revenue_jpy" in body || "completed_at" in body || "status" in body)) return json({ ok: false, error: "locked", hint: "Lavoro gia' in un estratto conto: annulla l'estratto prima di cambiare importi o date." }, 409);
     const f = {};
-    if ("status" in body) { if (!REF_ST.includes(body.status)) return json({ ok: false, error: "bad_status" }, 400); f.status = body.status; }
+    if ("status" in body) {
+      const allowed = isAdmin ? REF_ST : REF_ST.filter((x) => !["open", "cancelled"].includes(x));
+      if (!allowed.includes(body.status)) return json({ ok: false, error: "bad_status" }, 400);
+      if (body.status === "open" && r.operator_id) return json({ ok: false, error: "already_taken", hint: "Il lavoro e' gia' stato preso: per riaprirlo usa 'Riapri'." }, 409);
+      f.status = body.status;
+    }
+    if (isAdmin && body.reopen) { if (r.statement_id) return json({ ok: false, error: "locked" }, 409); Object.assign(f, { status: "open", operator_id: null, accepted_at: null, accepted_by: null, fee_rate: null, fee_jpy: null, revenue_jpy: null, completed_at: null }); }
     if ("completed_at" in body) { const d = str(body.completed_at, 10); if (d && !/^\d{4}-\d{2}-\d{2}$/.test(d)) return json({ ok: false, error: "bad_date" }, 400); f.completed_at = d; }
     if ("revenue_jpy" in body) f.revenue_jpy = body.revenue_jpy === "" || body.revenue_jpy == null ? null : int(body.revenue_jpy, 0, 1e9);
-    if ("operator_note" in body) f.operator_note = str(body.operator_note, 2000);
+    if ("operator_note" in body && !isAdmin) f.operator_note = str(body.operator_note, 2000);
     if (isAdmin && "admin_note" in body) f.admin_note = str(body.admin_note, 2000);
-    if (isAdmin) for (const k of ["client_name", "client_company", "client_email", "client_phone", "service_date", "request"]) if (k in body) f[k] = str(body[k], k === "request" ? 2000 : 200);
+    if (isAdmin) for (const k of ["job_title", "service_date", "area", "job_langs", "job_details", "client_name", "client_company", "client_email", "client_phone", "request"]) if (k in body) f[k] = str(body[k], ["job_details", "request"].includes(k) ? 2000 : 200);
     const merged = { ...r, ...f };
     if (merged.status === "completed" && (merged.revenue_jpy == null || !merged.completed_at)) return json({ ok: false, error: "completion_incomplete", hint: isAdmin ? "Per chiudere servono importo fatturato e data del servizio." : "完了にするには、ご請求額（税抜）とご利用日を入力してください。" }, 400);
-    f.fee_jpy = merged.revenue_jpy == null ? null : Math.floor(merged.revenue_jpy * merged.fee_rate);
+    if (!body.reopen) f.fee_jpy = merged.revenue_jpy == null || merged.fee_rate == null ? null : Math.floor(merged.revenue_jpy * merged.fee_rate);
     await DB.prepare(`UPDATE referrals SET ${Object.keys(f).map((k) => k + "=?").join(",")}, updated_at=? WHERE id=?`).bind(...Object.values(f), now(), m[1]).run();
-    return json({ ok: true, fee_jpy: f.fee_jpy });
+    return json({ ok: true, fee_jpy: f.fee_jpy ?? null });
   }
   if (p === "/statements" && M === "GET") {
     if (!isAdmin && !isOp) return deny();

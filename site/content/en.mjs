@@ -206,7 +206,7 @@ export default {
           "where required by law",
           "where necessary to protect a person's life, body or property and consent is difficult to obtain",
           "where necessary to cooperate with public authorities carrying out duties prescribed by law",
-        ], note: "If you ask for a car with a driver and we refer you to a licensed partner operator, we will ask for your consent first and pass on only what the referral needs." },
+        ], note: "If you ask for a car with a driver and we refer you to a licensed partner operator, we will ask for your consent first and pass on only what the referral needs. Until one partner takes the booking, partners see only details that do not identify you, such as date, area and requirements; your name and contact details go only to the partner who takes it." },
         { type: "text", h2: "Service providers and processing outside Japan", paras: [
           "We entrust the handling of personal information to the following providers, only as needed for the purposes above. Both are based in the United States, and data may be stored on servers outside Japan.",
         ], list: [
