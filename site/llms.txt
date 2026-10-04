@@ -2,11 +2,11 @@
 
 > A multilingual professional driver for licensed hire car (green plate) and taxi operators in Japan. The driver is {{TEACHER}}, the founder, in person: he holds Japan's Class 2 commercial licence (nishu menkyo) and speaks Japanese, English, Italian, French and Spanish. He joins operators as their own part-time employee to handle foreign VIP bookings. {{BRAND}} also trains operators' drivers in VIP service and issues the {{CERT}}.
 
-{{BRAND}} is a small, owner run business operated by 6 Ltd (6株式会社), Tokyo. It is not a staffing agency, not a taxi company and not a car rental company.
+{{BRAND}} is a small, owner run business in Tokyo. It is not a staffing agency, not a taxi company and not a car rental company.
 
 ## For hire and taxi operators (main service)
 
-- **A multilingual driver on the operator's own team.** Under Article 36 of Japan's passenger transport regulations, drivers of green-plate vehicles must be employed and appointed by the operator. {{TEACHER}} therefore works under a part-time employment contract with each operator, for more than two months or open-ended, never as day labour, a contractor or a dispatched worker.
+- **A multilingual driver on the operator's own team.** {{TEACHER}} works under a part-time employment contract with each operator, for more than two months or open-ended, never as day labour, a contractor or a dispatched worker.
 - **Training and certification.** A three day course for operators' drivers: VIP protocol, service language, in-car practice. Those who attend receive an attestation of completion; those who pass the oral, practical and written exams receive the {{CERT}}, valid for two years and verifiable by QR code at {{SITE}}/en/verify/. It is a private certification, not a national or government qualification.
 - **Client referrals.** Clients who need a car with a driver are referred to licensed partner operators. The transport contract is between the operator and the client.
 

@@ -46,7 +46,7 @@ export default {
           { h3: "Interview", p: "At your depot. You can check his driving licence and driving record certificate." },
           { h3: "Contract and appointment", p: "A part-time employment contract for more than two months, and you appoint him as one of your drivers. Roll call, aptitude test and medical check follow your own rules." },
           { h3: "Start driving", p: "He works around your foreign clients' bookings." },
-        ], note: "Under Article 36 of Japan's passenger transport regulations, your drivers must be employed and appointed by you. We do not accept day labour, contracts of two months or less, contractor agreements or worker dispatch." },
+        ] },
         { type: "cards", h2: "Why this driver", cols: 4, items: [
           { h3: "Class 2 licence", p: "The Japanese licence required to carry paying passengers." },
           { h3: "Five languages", p: "Japanese, English, Italian, French and Spanish." },
@@ -54,7 +54,7 @@ export default {
           { h3: "Knows Western clients", p: "Italian by birth. He knows what European and American guests expect, and what puts them off." },
         ] },
         { type: "profile", h2: "The driver", name: "{{TEACHER}}", photo: { ...{"src": "/assets/fulvio-portrait.webp", "w": 380, "h": 507}, alt: "Driver {{TEACHER}}" }, paras: ["An Italian based in Tokyo. He holds a Japanese Class 2 licence and has chauffeured VIP clients and hosted overseas delegations in Japanese, English, Italian, French and Spanish.", "He keeps every booking and every client confidential under your company rules. No photos, no social media.", "He also trains the drivers of hire and taxi operators for {{CERT}}."], chips: ["Italiano", "English", "日本語", "Français", "Español"], link: { page: "training", label: "About VIP service training and certification" } },
-        { type: "notice", h2: "What we do not do", paras: ["{{COMPANY}} does not carry passengers, and does not dispatch drivers or supply them under contractor agreements. Every shift at your company is driven as your own employed and appointed driver."] },
+        { type: "notice", h2: "What we do not do", paras: ["{{BRAND}} does not carry passengers, and does not dispatch drivers or supply them under contractor agreements. Every shift at your company is driven as your own employed and appointed driver."] },
         { type: "faq", h2: "Questions", items: [
           { q: "How long is the contract?", a: "More than two months (we suggest three months or longer), or open-ended." },
           { q: "Do you drive for other operators too?", a: "He may hold part-time contracts with more than one operator. Working days are agreed month by month so they never overlap, and working hours are counted together across employers." },
@@ -183,8 +183,8 @@ export default {
       blocks: [ { type: "verify" }, { type: "notice", paras: ["{{CERT}} is a private certification issued by {{BRAND}}. It is not a national or government qualification."] } ],
     },
     privacy: {
-      title: "Privacy Notice | {{BRAND}}", meta: "How {{COMPANY}} ({{BRAND}}) handles personal information: what we collect, why, who processes it for us, how we protect it and how to make a request.", noindex: true,
-      h1: "Privacy notice", sub: "{{COMPANY}} (\"we\") operates {{BRAND}}. We handle personal information in line with Japan's Act on the Protection of Personal Information (APPI) and other applicable laws, as set out below.",
+      title: "Privacy Notice | {{BRAND}}", meta: "How {{BRAND}} handles personal information: what we collect, why, who processes it for us, how we protect it and how to make a request.", noindex: true,
+      h1: "Privacy notice", sub: "{{BRAND}} (\"we\") handles personal information in line with Japan's Act on the Protection of Personal Information (APPI) and other applicable laws, as set out below.",
       blocks: [
         { type: "text", h2: "Who we are", list: ["Name: {{COMPANY}} (service name: {{BRAND}})", "Address: {{ADDRESS}}", "Representative: {{REP}}", "Privacy contact: {{PRIVACY_EMAIL}}"] },
         { type: "text", h2: "What we collect", paras: ["We collect the following information by fair means."], list: [
