@@ -14,7 +14,7 @@ export default {
       company: { label: "会社名・団体名" }, contact: { label: "ご担当者名" }, name: { label: "お名前" }, email: { label: "メールアドレス" }, phone: { label: "電話番号" },
       plan: { label: "ご希望のプラン", options: [["standard", "スタンダード"], ["casual", "スポット"], ["vip", "VIP"], ["unsure", "相談して決めたい"]] },
       date: { label: "ご利用日・期間", ph: "例：11月12日〜14日" }, hours: { label: "1日あたりの時間数（目安）" },
-      languages: { label: "ドライバーに必要な言語", multi: true, options: [["en", "英語"], ["zh", "中国語"], ["it", "イタリア語"], ["fr", "フランス語"], ["es", "スペイン語"], ["other", "その他"]] },
+      languages: { label: "ドライバーに必要な言語", multi: true, options: [["en", "英語"], ["it", "イタリア語"], ["fr", "フランス語"], ["es", "スペイン語"], ["other", "その他"]] },
       vehicle: { label: "運転していただく車両", ph: "例：アルファード（社有車）" }, city: { label: "地域", ph: "例：東京都港区" },
       line: { label: "LINE ID" }, wechat: { label: "WeChat ID" }, message: { label: "ご質問・ご要望" },
       consent: { label: "個人情報の取り扱いに同意します。" },

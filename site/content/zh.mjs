@@ -14,7 +14,7 @@ export default {
       company: { label: "公司或机构名称" }, contact: { label: "联系人" }, name: { label: "姓名" }, email: { label: "电子邮箱" }, phone: { label: "电话" },
       plan: { label: "希望的方案", options: [["standard", "标准"], ["casual", "临时"], ["vip", "VIP"], ["unsure", "想先咨询"]] },
       date: { label: "使用日期或期间", ph: "例：11月12日至14日" }, hours: { label: "每天大约几小时" },
-      languages: { label: "司机需要的语言", multi: true, options: [["en", "英语"], ["zh", "中文"], ["it", "意大利语"], ["fr", "法语"], ["es", "西班牙语"], ["other", "其他"]] },
+      languages: { label: "司机需要的语言", multi: true, options: [["en", "英语"], ["it", "意大利语"], ["fr", "法语"], ["es", "西班牙语"], ["other", "其他"]] },
       vehicle: { label: "需要驾驶的车辆", ph: "例：埃尔法（公司车）" }, city: { label: "地区", ph: "例：东京都港区" },
       line: { label: "LINE ID" }, wechat: { label: "微信号" }, message: { label: "问题或需求" },
       consent: { label: "我同意个人信息的处理方式。" },

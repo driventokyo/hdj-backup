@@ -14,7 +14,7 @@ export default {
       company: { label: "Company or organisation" }, contact: { label: "Contact person" }, name: { label: "Full name" }, email: { label: "Email" }, phone: { label: "Phone" },
       plan: { label: "Preferred plan", options: [["standard", "Standard"], ["casual", "Short notice"], ["vip", "VIP"], ["unsure", "Not sure yet"]] },
       date: { label: "Date or period", ph: "e.g. 12 to 14 November" }, hours: { label: "Hours per day (approx.)" },
-      languages: { label: "Languages the driver needs", multi: true, options: [["en", "English"], ["zh", "Chinese"], ["it", "Italian"], ["fr", "French"], ["es", "Spanish"], ["other", "Other"]] },
+      languages: { label: "Languages the driver needs", multi: true, options: [["en", "English"], ["it", "Italian"], ["fr", "French"], ["es", "Spanish"], ["other", "Other"]] },
       vehicle: { label: "Vehicle to be driven", ph: "e.g. Toyota Alphard, company car" }, city: { label: "Area", ph: "e.g. Minato, Tokyo" },
       line: { label: "LINE ID" }, wechat: { label: "WeChat ID" }, message: { label: "Questions or details" },
       consent: { label: "I agree to the handling of my personal data as described in the" },
