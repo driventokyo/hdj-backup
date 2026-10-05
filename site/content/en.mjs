@@ -1,7 +1,7 @@
 // English version: corporate clients, foreign companies in Japan, hotels, DMCs and overseas agencies.
 export default {
   ui: {
-    tokushohoLink: "Legal notice", blogLink: "Blog", blogIndexTitle: "Blog: hire car drivers and executive drivers in Japan", blogIndexMeta: "Articles for hire and taxi operators and corporate staff: the Class 2 licence, executive driver rates, serving foreign VIPs.", readMore: "Read more", posted: "Published", repPh: "Representative (to be published)", emailPh: "Contact email (coming soon)", datePh: "Date (set on publication)", skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
+    groupLabel: "6 LTD Group", tokushohoLink: "Legal notice", blogLink: "Blog", blogIndexTitle: "Blog: hire car drivers and executive drivers in Japan", blogIndexMeta: "Articles for hire and taxi operators and corporate staff: the Class 2 licence, executive driver rates, serving foreign VIPs.", readMore: "Read more", posted: "Published", repPh: "Representative (to be published)", emailPh: "Contact email (coming soon)", datePh: "Date (set on publication)", skip: "Skip to content", menu: "Menu", tagShort: "Private driver, Tokyo", optional: "optional", choose: "Please choose",
     privacyLink: "Privacy notice", operatedBy: "Operated by", verifyNav: "Verify a certificate", onQuote: "On request", fromHour: "From % per hour (excl. tax)",
     teacherPh: "Trainer name (to be published)", photoPh: "Trainer photo (coming soon)", addressPh: "Registered address (coming soon)",
     certNo: "Certificate number", verifyBtn: "Verify", verifyHint: "Certificate numbers look like 2026-0001. You can also scan the QR code the driver shows you.", scanBtn: "Scan a QR code",
