@@ -46,12 +46,6 @@ export default {
           { src: "/assets/cert-vvip-sample2-900.webp", w: 900, h: 636, alt: "認証書 VVIP Service Certificate", h3: "認証書　VVIP Service Certificate", p: "3日間の研修と、外国語の口頭試験・実地シナリオ・筆記試験に合格した乗務員に。有効期間2年。", href: "training" },
           { src: "/assets/cert-attestation-sample2-900.webp", w: 900, h: 636, alt: "修了証 Attestation of Completion", h3: "修了証　Attestation of Completion", p: "研修の全日程を修了した乗務員に。期限はありません。", href: "training" },
         ], cta: { label: "研修と認証の内容を見る", href: "training" } },
-        { type: "steps", id: "how", h2: "雇用までの流れ", items: [
-          { h3: "ご相談", p: "必要な言語、勤務日、時間帯、想定されるご依頼をお知らせください。" },
-          { h3: "面談", p: "御社の営業所で面談します。運転免許証と運転記録証明書をご確認いただけます。" },
-          { h3: "雇用契約と選任", p: "2か月を超える期間のパートタイム雇用契約を結び、御社が乗務員として選任します。点呼、適性診断、健康診断は御社の規程どおりに受けます。" },
-          { h3: "乗務の開始", p: "外国人のお客さまのご依頼に合わせて勤務します。" },
-        ] },
         { type: "cards", h2: "ドライバーの強み", cols: 4, items: [
           { h3: "第二種免許", p: "旅客運送に必要な普通第二種免許を保有しています。" },
           { h3: "5か国語", p: "日本語、英語、イタリア語、フランス語、スペイン語で接客します。" },

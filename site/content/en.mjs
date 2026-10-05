@@ -46,12 +46,6 @@ export default {
           { src: "/assets/cert-vvip-sample2-900.webp", w: 900, h: 636, alt: "VVIP Service Certificate diploma", h3: "VVIP Service Certificate", p: "For drivers who complete the three-day training and pass the oral language exam, the practical scenario and the written exam. Valid two years.", href: "training" },
           { src: "/assets/cert-attestation-sample2-900.webp", w: 900, h: 636, alt: "Attestation of Completion diploma", h3: "Attestation of Completion", p: "For drivers who attend every day of the training. No expiry.", href: "training" },
         ], cta: { label: "See the training and certification", href: "training" } },
-        { type: "steps", id: "how", h2: "How hiring works", items: [
-          { h3: "Talk to us", p: "Languages needed, working days, hours and the kind of bookings you expect." },
-          { h3: "Interview", p: "At your depot. You can check his driving licence and driving record certificate." },
-          { h3: "Contract and appointment", p: "A part-time employment contract for more than two months, and you appoint him as one of your drivers. Roll call, aptitude test and medical check follow your own rules." },
-          { h3: "Start driving", p: "He works around your foreign clients' bookings." },
-        ] },
         { type: "cards", h2: "Why this driver", cols: 4, items: [
           { h3: "Class 2 licence", p: "The Japanese licence required to carry paying passengers." },
           { h3: "Five languages", p: "Japanese, English, Italian, French and Spanish." },

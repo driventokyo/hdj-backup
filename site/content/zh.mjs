@@ -46,12 +46,6 @@ export default {
           { src: "/assets/cert-vvip-sample2-900.webp", w: 900, h: 636, alt: "认证书 VVIP Service Certificate", h3: "认证书　VVIP Service Certificate", p: "颁发给完成三天培训并通过外语口试、实操情景和笔试的司机。有效期两年。", href: "training" },
           { src: "/assets/cert-attestation-sample2-900.webp", w: 900, h: 636, alt: "结业证明 Attestation of Completion", h3: "结业证明　Attestation of Completion", p: "颁发给完成全部培训日程的司机。无有效期限制。", href: "training" },
         ], cta: { label: "查看培训与认证内容", href: "training" } },
-        { type: "steps", id: "how", h2: "雇用流程", items: [
-          { h3: "咨询", p: "请告诉我们需要的语言、工作日、时段和预计的订单类型。" },
-          { h3: "面谈", p: "在贵公司营业所面谈，可确认驾照和驾驶记录证明书。" },
-          { h3: "签约与选任", p: "签订期限超过两个月的兼职雇佣合同，由贵公司选任为司机。点呼、适性诊断和健康检查按贵公司规定进行。" },
-          { h3: "开始工作", p: "根据外国客人的订单安排工作。" },
-        ] },
         { type: "cards", h2: "司机的优势", cols: 4, items: [
           { h3: "二种驾照", p: "持有载客运营所需的普通二种驾照。" },
           { h3: "五种语言", p: "日语、英语、意大利语、法语和西班牙语。" },
