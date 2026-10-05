@@ -117,9 +117,9 @@ async function lead(req, env, ctx) {
 }
 
 const AUTO = {
-  ja: { s: "お問い合わせありがとうございます", b: (n, id) => `${n} 様\n\nお問い合わせを受け付けました（受付番号 ${id}）。\n担当者より2営業日以内にご連絡いたします。\n\n` },
-  zh: { s: "感谢您的咨询", b: (n, id) => `${n} 您好：\n\n我们已收到您的信息（受理编号 ${id}）。\n负责人会在两个工作日内与您联系。\n\n` },
-  en: { s: "Thank you for contacting us", b: (n, id) => `Dear ${n},\n\nWe have received your message (reference ${id}).\nWe will reply within two business days.\n\n` },
+  ja: { s: "お問い合わせありがとうございます", b: (n, id) => `${n} 様\n\nお問い合わせを受け付けました（受付番号 ${id}）。\n内容を確認し、できるだけ早くご連絡いたします。お急ぎの場合は WhatsApp（070-4743-3845）にもご連絡ください。\n\n` },
+  zh: { s: "感谢您的咨询", b: (n, id) => `${n} 您好：\n\n我们已收到您的信息（受理编号 ${id}）。\n我们会尽快与您联系。如有急事，请同时通过 WhatsApp（+81 70-4743-3845）联系我们。\n\n` },
+  en: { s: "Thank you for contacting us", b: (n, id) => `Dear ${n},\n\nWe have received your message (reference ${id}).\nWe will reply as soon as possible. If it is urgent, please also message us on WhatsApp: +81 70-4743-3845.\n\n` },
 };
 async function notify(env, x) {
   if (!env.RESEND_API_KEY || !env.FROM_EMAIL) { console.log("email non inviata: RESEND_API_KEY o FROM_EMAIL mancanti", x.id); return; }
