@@ -2,6 +2,7 @@
 // Il resto (pagine statiche e pannello) lo serve [assets] da dist/.
 import { academyPublic, academyAdmin } from "./academy.js";
 import { payPublic, stripeWebhook, payAdmin } from "./payments.js";
+import { EmailMessage } from "cloudflare:email";
 
 const now = () => new Date().toISOString();
 const json = (o, s = 200, h = {}) => new Response(JSON.stringify(o), { status: s, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...h } });
@@ -121,12 +122,25 @@ const AUTO = {
   zh: { s: "感谢您的咨询", b: (n, id) => `${n} 您好：\n\n我们已收到您的信息（受理编号 ${id}）。\n我们会尽快与您联系。如有急事，请同时通过 WhatsApp（+81 70-4743-3845）联系我们。\n\n` },
   en: { s: "Thank you for contacting us", b: (n, id) => `Dear ${n},\n\nWe have received your message (reference ${id}).\nWe will reply as soon as possible. If it is urgent, please also message us on WhatsApp: +81 70-4743-3845.\n\n` },
 };
+
+// Avvisi al fondatore GRATIS con l'Email Routing di Cloudflare (binding NOTIFY): si puo' scrivere solo a indirizzi verificati,
+// quindi va bene per gli avvisi interni (driventokyo@gmail.com), non per i clienti. Le conferme ai clienti passano da Resend.
+const b64 = (str) => { const b = new TextEncoder().encode(str); let s = ""; for (let i = 0; i < b.length; i++) s += String.fromCharCode(b[i]); return btoa(s); };
+async function alertFounder(env, subject, text) {
+  if (!env.NOTIFY) { console.log("NOTIFY non configurato:", subject); return; }
+  const from = "alerts@hiredriverjapan.com", to = env.NOTIFY_TO || "driventokyo@gmail.com";
+  const raw = [`From: "HIRE driver japan" <${from}>`, `To: <${to}>`, `Subject: =?UTF-8?B?${b64(subject)}?=`, `Date: ${new Date().toUTCString()}`, `Message-ID: <${crypto.randomUUID()}@hiredriverjapan.com>`, "MIME-Version: 1.0", "Content-Type: text/plain; charset=UTF-8", "Content-Transfer-Encoding: base64", "", b64(text).replace(/(.{76})/g, "$1\r\n")].join("\r\n");
+  await env.NOTIFY.send(new EmailMessage(from, to, raw));
+}
 async function notify(env, x) {
+  const lbl = { corporate: "Azienda", operator: "Operatore", book: "PRENOTAZIONE RAPIDA", training: "Formazione", driver: "Candidatura autista" }[x.type];
+  const lines = Object.entries(x.summary).filter(([, v]) => v != null && v !== "").map(([k, v]) => `${k}: ${v}`).join("\n");
+  await alertFounder(env, `[HDJ ${lbl}] ${x.id} ${x.summary.Azienda || x.summary.Operatore || x.summary["Prenotazione rapida (azienda hire)"] || x.summary.Nome || ""}`, `${lbl} ${x.id}\nLingua del sito: ${x.lang}\n\n${lines}\n\nPannello: ${env.SITE_URL}/admin/`).catch((e) => console.error("alertFounder", e));
   if (!env.RESEND_API_KEY || !env.FROM_EMAIL) { console.log("email non inviata: RESEND_API_KEY o FROM_EMAIL mancanti", x.id); return; }
   const send = (o) => fetch("https://api.resend.com/emails", { method: "POST", headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `${x.id}-${o.tag}` }, body: JSON.stringify(o.body) });
   const rows = Object.entries(x.summary).filter(([, v]) => v != null && v !== "").map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#5b6875">${esc(k)}</td><td style="padding:4px 0">${esc(v)}</td></tr>`).join("");
   const label = { corporate: "Azienda", operator: "Operatore", book: "PRENOTAZIONE RAPIDA", training: "Formazione", driver: "Candidatura autista" }[x.type];
-  if (env.CONTACT_EMAIL) await send({ tag: "int", body: { from: env.FROM_EMAIL, to: [env.CONTACT_EMAIL], reply_to: x.email, subject: `[${label}] ${x.id} ${x.summary.Azienda || x.summary.Operatore || x.summary.Nome || ""}`, html: `<p><b>${esc(label)}</b> · ${esc(x.id)} · lingua ${esc(x.lang)}</p><table style="font:14px system-ui">${rows}</table><p><a href="${esc(env.SITE_URL)}/admin/">Apri il pannello</a></p>` } });
+  if (env.CONTACT_EMAIL && !env.NOTIFY) await send({ tag: "int", body: { from: env.FROM_EMAIL, to: [env.CONTACT_EMAIL], reply_to: x.email, subject: `[${label}] ${x.id} ${x.summary.Azienda || x.summary.Operatore || x.summary.Nome || ""}`, html: `<p><b>${esc(label)}</b> · ${esc(x.id)} · lingua ${esc(x.lang)}</p><table style="font:14px system-ui">${rows}</table><p><a href="${esc(env.SITE_URL)}/admin/">Apri il pannello</a></p>` } });
   const a = AUTO[x.lang] || AUTO.en; const brand = env.BRAND_NAME || "";
   await send({ tag: "ack", body: { from: env.FROM_EMAIL, to: [x.email], subject: `${a.s} | ${brand}`, text: a.b(x.name || "", x.id) + brand, ...(env.CONTACT_EMAIL ? { reply_to: env.CONTACT_EMAIL } : {}) } });
 }
@@ -527,7 +541,8 @@ async function daily(env) {
   await env.DB.prepare(`UPDATE renewals SET status='lapsed', updated_at=? WHERE status IN ('due','scheduled') AND certificate_id IN (SELECT id FROM certificates WHERE status='expired')`).bind(t).run();
   const list = (await env.DB.prepare(`SELECT c.id, c.expires_at, d.full_name, o.name AS op FROM certificates c JOIN drivers d ON d.id=c.driver_id LEFT JOIN operators o ON o.id=d.operator_id WHERE c.status='active' AND c.expires_at<=date('now','+60 day') ORDER BY c.expires_at`).all()).results;
   const nl = await env.DB.prepare(`SELECT (SELECT COUNT(*) FROM leads_service WHERE stage='new')+(SELECT COUNT(*) FROM leads_training WHERE stage='new')+(SELECT COUNT(*) FROM driver_applications WHERE stage='new') AS n`).first();
-  if ((list.length || nl.n) && env.RESEND_API_KEY && env.FROM_EMAIL && env.CONTACT_EMAIL) {
+  if ((list.length || nl.n) && env.NOTIFY) await alertFounder(env, `[HDJ riepilogo ${today}] ${nl.n} richieste nuove, ${list.length} certificati in scadenza`, `Richieste nuove da lavorare: ${nl.n}\n\nCertificati in scadenza entro 60 giorni:\n${list.map((x) => `- ${x.id} ${x.full_name} ${x.op || ""} scade ${x.expires_at}`).join("\n") || "- nessuno"}\n\nPannello: ${env.SITE_URL}/admin/`).catch((e) => console.error("digest", e));
+  else   if ((list.length || nl.n) && env.RESEND_API_KEY && env.FROM_EMAIL && env.CONTACT_EMAIL) {
     const rows = list.map((x) => `<li>${esc(x.id)} · ${esc(x.full_name)} · ${esc(x.op || "")} · scade ${esc(x.expires_at)}</li>`).join("");
     await fetch("https://api.resend.com/emails", { method: "POST", headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `daily-${today}` }, body: JSON.stringify({ from: env.FROM_EMAIL, to: [env.CONTACT_EMAIL], subject: `[Riepilogo ${today}] ${nl.n} richieste nuove, ${list.length} certificati in scadenza`, html: `<p>Richieste nuove da lavorare: <b>${nl.n}</b></p><p>Certificati in scadenza entro 60 giorni:</p><ul>${rows || "<li>nessuno</li>"}</ul><p><a href="${esc(env.SITE_URL)}/admin/">Pannello</a></p>` }) });
   }

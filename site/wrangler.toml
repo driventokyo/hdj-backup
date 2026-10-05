@@ -21,6 +21,11 @@ not_found_handling = "404-page"   # serve dist/404.html con status 404
 binding = "ACADEMY"
 bucket_name = "hdj-academy"
 
+# Avvisi al fondatore, gratis con l'Email Routing (solo verso indirizzi verificati)
+[[send_email]]
+name = "NOTIFY"
+destination_address = "driventokyo@gmail.com"
+
 [[d1_databases]]
 binding = "DB"
 database_name = "hdj-data"
