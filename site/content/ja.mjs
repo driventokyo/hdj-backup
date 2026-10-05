@@ -43,8 +43,8 @@ export default {
           { tag: "受付中", h3: "送客のご提携", p: "車両とドライバーのセットをご希望のお客さまを、提携する許可事業者さまにご紹介します。運送の契約は御社とお客さまの間で結ばれます。" },
         ] },
         { type: "figures", id: "certificates", h2: "VVIP Service Certificate：乗務員の価値を証明する認証", intro: "御社の乗務員が研修を修了し、3つの試験に合格した証です。ホテルや海外の手配会社は、認証番号とQRコードでいつでも真正性を確認できます。", items: [
-          { src: "/assets/cert-vvip-sample-900.webp", w: 900, h: 636, alt: "認証書 VVIP Service Certificate", h3: "認証書　VVIP Service Certificate", p: "3日間の研修と、外国語の口頭試験・実地シナリオ・筆記試験に合格した乗務員に。有効期間2年。", href: "training" },
-          { src: "/assets/cert-attestation-sample-900.webp", w: 900, h: 636, alt: "修了証 Attestation of Completion", h3: "修了証　Attestation of Completion", p: "研修の全日程を修了した乗務員に。期限はありません。", href: "training" },
+          { src: "/assets/cert-vvip-sample2-900.webp", w: 900, h: 636, alt: "認証書 VVIP Service Certificate", h3: "認証書　VVIP Service Certificate", p: "3日間の研修と、外国語の口頭試験・実地シナリオ・筆記試験に合格した乗務員に。有効期間2年。", href: "training" },
+          { src: "/assets/cert-attestation-sample2-900.webp", w: 900, h: 636, alt: "修了証 Attestation of Completion", h3: "修了証　Attestation of Completion", p: "研修の全日程を修了した乗務員に。期限はありません。", href: "training" },
         ], cta: { label: "研修と認証の内容を見る", href: "training" } },
         { type: "steps", id: "how", h2: "雇用までの流れ", items: [
           { h3: "ご相談", p: "必要な言語、勤務日、時間帯、想定されるご依頼をお知らせください。" },

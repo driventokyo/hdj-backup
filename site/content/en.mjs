@@ -43,8 +43,8 @@ export default {
           { tag: "Available", h3: "Client referrals", p: "We refer clients who need a car and a driver to licensed partner operators. The transport contract is between you and the client." },
         ] },
         { type: "figures", id: "certificates", h2: "VVIP Service Certificate: proof of your drivers' standard", intro: "Awarded to drivers who complete the training and pass all three exams. Hotels and overseas agencies can verify any certificate at any time by its number or QR code.", items: [
-          { src: "/assets/cert-vvip-sample-900.webp", w: 900, h: 636, alt: "VVIP Service Certificate diploma", h3: "VVIP Service Certificate", p: "For drivers who complete the three-day training and pass the oral language exam, the practical scenario and the written exam. Valid two years.", href: "training" },
-          { src: "/assets/cert-attestation-sample-900.webp", w: 900, h: 636, alt: "Attestation of Completion diploma", h3: "Attestation of Completion", p: "For drivers who attend every day of the training. No expiry.", href: "training" },
+          { src: "/assets/cert-vvip-sample2-900.webp", w: 900, h: 636, alt: "VVIP Service Certificate diploma", h3: "VVIP Service Certificate", p: "For drivers who complete the three-day training and pass the oral language exam, the practical scenario and the written exam. Valid two years.", href: "training" },
+          { src: "/assets/cert-attestation-sample2-900.webp", w: 900, h: 636, alt: "Attestation of Completion diploma", h3: "Attestation of Completion", p: "For drivers who attend every day of the training. No expiry.", href: "training" },
         ], cta: { label: "See the training and certification", href: "training" } },
         { type: "steps", id: "how", h2: "How hiring works", items: [
           { h3: "Talk to us", p: "Languages needed, working days, hours and the kind of bookings you expect." },

@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const FONTS = path.join(HERE, "..", "fonts");
-const TEACHER = "Fulvio Conversi";
+const TEACHER = "コンベルシ フルビオ"; // il nome si scrive sempre in katakana, mai in caratteri latini
 const GOLD = "#B08D4F", INK = "#14110E", RED = "#A3141F", RED2 = "#7E0E17", IVORY = "#FBF8F1";
 
 const DOCS = {
@@ -88,7 +88,7 @@ h1{font-family:"Noto Serif JP";font-weight:700;font-size:15mm;letter-spacing:.35
 .fields span{position:absolute;bottom:-4.6mm;left:0;font-family:"Noto Sans JP";font-size:2.5mm;color:#7a705f;white-space:nowrap}.fields span b{font-family:Jost;font-weight:400;letter-spacing:.06em;margin-left:1.2mm}
 .ros{position:absolute;left:18mm;bottom:16mm;width:44mm}
 .sig{position:absolute;bottom:25mm;left:118mm;width:62mm;text-align:center;border-top:.3mm solid ${INK};padding-top:1.5mm;font-family:"Noto Sans JP";font-size:2.7mm;color:#5b5143}
-.sig b{display:block;font-family:"Cormorant Garamond";font-size:4.2mm;color:${INK};font-weight:600;margin-top:.4mm}
+.sig b{display:block;font-family:"Noto Serif JP";font-size:3.9mm;letter-spacing:.12em;color:${INK};font-weight:600;margin-top:.4mm}
 .stamp{position:absolute;right:24mm;bottom:19mm;width:30mm;height:30mm;border:.35mm dashed #b9ad97;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-direction:column;font-family:"Noto Serif JP";color:#b9ad97;font-size:6mm}
 .stamp small{font-family:Jost;font-size:2.2mm;letter-spacing:.12em;margin-top:.6mm}
 .foot{position:absolute;bottom:15mm;left:0;right:0;text-align:center;font-family:"Noto Sans JP";font-size:2.3mm;color:#8a806e;line-height:1.5}
