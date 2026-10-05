@@ -203,7 +203,7 @@ export default {
       title: "特定商业交易法规定的标示｜{{BRAND}}", meta: "{{BRAND}}根据日本特定商业交易法的标示：经营者、地址、联系方式、价格、付款方式与取消规定。",
       h1: "特定商业交易法规定的标示", sub: "",
       blocks: [
-        { type: "text", h2: "经营者", list: ["经营者：{{COMPANY}}（服务名称：{{BRAND}}）", "运营负责人：{{REP}}", "地址：{{ADDRESS}}", "电话：089-906-5162（工作日 10:00〜18:00，急事请发邮件）", "电子邮箱：{{PRIVACY_EMAIL}}", "官方网站：hiredriverjapan.com"] },
+        { type: "text", h2: "经营者", list: ["经营者：{{COMPANY}}（服务名称：{{BRAND}}）", "运营负责人：{{REP}}", "地址：{{ADDRESS}}", "电话：070-4743-3845（工作日 10:00〜18:00，急事请发邮件）", "电子邮箱：{{PRIVACY_EMAIL}}", "官方网站：hiredriverjapan.com"] },
         { type: "text", h2: "价格", paras: ["各服务页面显示的价格，或报价中确认的金额（含消费税）。驾驶服务按小时计费，总额在报价时确定。"] },
         { type: "text", h2: "价格以外的费用", paras: ["驾驶服务中，燃油费、高速费、停车费按实际金额承担。在东京都以外进行培训时，交通费和住宿费另行报价。银行转账手续费由客户承担。"] },
         { type: "text", h2: "付款方式与时间", list: ["信用卡（Visa、Mastercard、JCB、American Express）：通过本公司发送的付款链接（hiredriverjapan.com/p/…），在服务提供前支付。", "银行转账：企业客户可按月结算，次月末付款。培训费请在开始日7天前转账。"] },
