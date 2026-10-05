@@ -43,8 +43,8 @@ export default {
           { tag: "接受中", h3: "客源合作", p: "把需要车和司机一起提供的客户，介绍给合作的正规包车公司。运输合同由贵公司与客户直接签订。" },
         ] },
         { type: "figures", id: "certificates", h2: "VVIP Service Certificate：证明司机水准的认证", intro: "颁发给完成培训并通过三项考试的司机。酒店和海外旅行社可随时通过编号或二维码确认真伪。", items: [
-          { src: "/assets/cert-vvip-1100.webp", w: 1100, h: 777, alt: "认证书 VVIP Service Certificate", h3: "认证书　VVIP Service Certificate", p: "颁发给完成三天培训并通过外语口试、实操情景和笔试的司机。有效期两年。", href: "training" },
-          { src: "/assets/cert-attestation-1100.webp", w: 1100, h: 777, alt: "结业证明 Attestation of Completion", h3: "结业证明　Attestation of Completion", p: "颁发给完成全部培训日程的司机。无有效期限制。", href: "training" },
+          { src: "/assets/cert-vvip-sample-900.webp", w: 900, h: 636, alt: "认证书 VVIP Service Certificate", h3: "认证书　VVIP Service Certificate", p: "颁发给完成三天培训并通过外语口试、实操情景和笔试的司机。有效期两年。", href: "training" },
+          { src: "/assets/cert-attestation-sample-900.webp", w: 900, h: 636, alt: "结业证明 Attestation of Completion", h3: "结业证明　Attestation of Completion", p: "颁发给完成全部培训日程的司机。无有效期限制。", href: "training" },
         ], cta: { label: "查看培训与认证内容", href: "training" } },
         { type: "steps", id: "how", h2: "雇用流程", items: [
           { h3: "咨询", p: "请告诉我们需要的语言、工作日、时段和预计的订单类型。" },
