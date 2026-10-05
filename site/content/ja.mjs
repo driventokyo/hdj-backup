@@ -1,7 +1,7 @@
 // 日本語版（基準版）。{{...}} は build.mjs が置換。<strong> <em> <br> のみ使用可。
 export default {
   ui: {
-    groupLabel: "6 LTD グループ", tokushohoLink: "特定商取引法に基づく表記", blogLink: "ブログ", blogIndexTitle: "ブログ｜ハイヤー乗務員と役員運転手の実務", blogIndexMeta: "第二種免許、役員運転手の料金、外国人VIPの送迎など、ハイヤー・タクシー事業者と企業の担当者向けの記事。", readMore: "続きを読む", posted: "公開日", repPh: "代表者名（掲載準備中）", emailPh: "窓口のメールアドレス（準備中）", datePh: "制定日（公開時に記載）", skip: "本文へ移動", menu: "メニュー", tagShort: "", optional: "任意", choose: "選択してください",
+    footTagline: "外国語で接客できる第二種免許ドライバーと、VIPサービスの研修・認証。", groupCompany: "A 6 LTD GROUP COMPANY", footServices: "サービス", footBook: "今すぐ予約", footPrice: "研修の料金", footCompany: "会社情報", footCerts: "認証書と修了証", footContact: "お問い合わせ", footAllPosts: "すべての記事", g6: "6 LTD · 親会社", gDriven: "Driven Tokyo · ハイヤー", gAwa: "Awahome · 不動産", groupLabel: "6 LTD グループ", tokushohoLink: "特定商取引法に基づく表記", blogLink: "ブログ", blogIndexTitle: "ブログ｜ハイヤー乗務員と役員運転手の実務", blogIndexMeta: "第二種免許、役員運転手の料金、外国人VIPの送迎など、ハイヤー・タクシー事業者と企業の担当者向けの記事。", readMore: "続きを読む", posted: "公開日", repPh: "代表者名（掲載準備中）", emailPh: "窓口のメールアドレス（準備中）", datePh: "制定日（公開時に記載）", skip: "本文へ移動", menu: "メニュー", tagShort: "", optional: "任意", choose: "選択してください",
     privacyLink: "個人情報の取り扱い", operatedBy: "運営会社：", verifyNav: "認証の確認", onQuote: "お見積り", fromHour: "1時間 %〜（税別）",
     teacherPh: "講師名（確定後に掲載）", photoPh: "講師写真（準備中）", addressPh: "所在地（掲載準備中）",
     certNo: "認証番号", verifyBtn: "確認する", verifyHint: "認証番号は「2026-0001」の形式です。ドライバーが提示するQRコードからも確認できます。", scanBtn: "QRコードを読み取る",

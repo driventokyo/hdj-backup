@@ -1,7 +1,7 @@
 // 简体中文版：面向在日中资企业、华人包车公司与旅行社。
 export default {
   ui: {
-    groupLabel: "6 LTD 集团", tokushohoLink: "特定商业交易法标示", blogLink: "博客", blogIndexTitle: "博客：日本包车司机与高管司机实务", blogIndexMeta: "面向包车、出租车公司和企业负责人的文章：二种驾照、高管司机费用、外国贵宾接待。", readMore: "阅读全文", posted: "发布日期", repPh: "代表人（准备中）", emailPh: "联系邮箱（准备中）", datePh: "日期（公布时填写）", skip: "跳到正文", menu: "菜单", tagShort: "", optional: "选填", choose: "请选择",
+    footTagline: "会外语的二种驾照司机，以及贵宾服务培训与认证。", groupCompany: "A 6 LTD GROUP COMPANY", footServices: "服务", footBook: "立即预约", footPrice: "培训价格", footCompany: "公司信息", footCerts: "认证书与结业证明", footContact: "联系我们", footAllPosts: "全部文章", g6: "6 LTD · 母公司", gDriven: "Driven Tokyo · 包车服务", gAwa: "Awahome · 不动产", groupLabel: "6 LTD 集团", tokushohoLink: "特定商业交易法标示", blogLink: "博客", blogIndexTitle: "博客：日本包车司机与高管司机实务", blogIndexMeta: "面向包车、出租车公司和企业负责人的文章：二种驾照、高管司机费用、外国贵宾接待。", readMore: "阅读全文", posted: "发布日期", repPh: "代表人（准备中）", emailPh: "联系邮箱（准备中）", datePh: "日期（公布时填写）", skip: "跳到正文", menu: "菜单", tagShort: "", optional: "选填", choose: "请选择",
     privacyLink: "个人信息保护说明", operatedBy: "运营公司：", verifyNav: "认证查询", onQuote: "报价咨询", fromHour: "每小时 % 起（不含税）",
     teacherPh: "讲师姓名（确认后公布）", photoPh: "讲师照片（准备中）", addressPh: "公司地址（准备中）",
     certNo: "认证编号", verifyBtn: "查询", verifyHint: "认证编号格式为「2026-0001」。也可以扫描司机出示的二维码。", scanBtn: "扫描二维码",
