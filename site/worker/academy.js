@@ -78,7 +78,7 @@ export async function academyPublic(req, env, url) {
 
   if (p === "/file" && M === "GET") {
     const k = url.searchParams.get("k") || "", w = url.searchParams.get("w") || "", e = int(url.searchParams.get("e"), 0, 4e9), sg = url.searchParams.get("s") || "";
-    if (!k.startsWith("materials/") || k.includes("..") || !e || e < Date.now() / 1000 || sg !== await hmac(env.ACADEMY_SECRET, `${k}.${w}.${e}`)) return new Response("Link scaduto", { status: 403 });
+    if (!(k.startsWith("materials/") || k.startsWith("instructor/") || k.startsWith("docs/")) || k.includes("..") || !e || e < Date.now() / 1000 || sg !== await hmac(env.ACADEMY_SECRET, `${k}.${w}.${e}`)) return new Response("Link scaduto", { status: 403 });
     const o = await env.ACADEMY.get(k); if (!o) return new Response("Not found", { status: 404 });
     return new Response(o.body, { headers: { "content-type": "application/pdf", "content-disposition": `inline; filename="${k.split("/").pop()}"`, "cache-control": "private, no-store", "x-robots-tag": "noindex" } });
   }
@@ -282,6 +282,35 @@ export async function academyAdmin(req, env, url, u, p, M, body) {
     const lessons = (await DB.prepare(`SELECT l.id, l.day, l.title_ja, COALESCE(p.watched_pct,0) AS pct, p.completed_at FROM lessons l LEFT JOIN lesson_progress p ON p.lesson_id=l.id AND p.driver_id=? WHERE l.status='published' ORDER BY l.day, l.position`).bind(d.id).all()).results;
     const attempts = (await DB.prepare(`SELECT started_at, submitted_at, score, passed FROM exam_attempts WHERE driver_id=? ORDER BY started_at`).bind(d.id).all()).results;
     return json({ ok: true, lessons, attempts });
+  }
+  // ---- libreria documenti della scuola: admin e docenti leggono e caricano; gli operatori non la vedono
+  const isTeacher = u.role === "teacher";
+  if (p === "/academy/docs" && M === "GET") {
+    if (!isAdmin && !isTeacher) return deny();
+    const rows = (await DB.prepare(`SELECT * FROM documents ORDER BY audience, lang, sort, category, title`).all()).results;
+    for (const r of rows) r.url = env.ACADEMY_SECRET ? await fileUrl(env, r.r2_key, u.id) : null;
+    return json({ ok: true, rows });
+  }
+  if (p === "/academy/docs/upload" && M === "PUT") {
+    if (!isAdmin && !isTeacher) return deny();
+    const name = (url.searchParams.get("name") || "file").replace(/[^A-Za-z0-9._-]+/g, "-").slice(0, 80);
+    const ct = url.searchParams.get("type") || "application/octet-stream";
+    if (!/^(application\/pdf|image\/(png|jpeg|webp)|text\/plain|application\/vnd\.openxmlformats-officedocument\.(wordprocessingml\.document|presentationml\.presentation|spreadsheetml\.sheet))$/.test(ct)) return json({ ok: false, error: "bad_type", hint: "PDF, immagini, Word, PowerPoint, Excel o testo." }, 400);
+    const key = `docs/${Date.now()}-${name}`;
+    const obj = await env.ACADEMY.put(key, req.body, { httpMetadata: { contentType: ct } });
+    const id = rid("DOC"), t = now();
+    await DB.prepare(`INSERT INTO documents (id,created_at,updated_at,lang,category,title,note,r2_key,bytes,content_type,audience,uploaded_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`)
+      .bind(id, t, t, ["en", "fr", "zh", "ja", "multi"].includes(url.searchParams.get("lang")) ? url.searchParams.get("lang") : "multi", str(url.searchParams.get("category"), 20) || "other", str(url.searchParams.get("title"), 200) || name, str(url.searchParams.get("note"), 500), key, obj.size, ct, "instructor", u.id).run();
+    return json({ ok: true, id, key });
+  }
+  if ((m = p.match(/^\/academy\/docs\/(DOC-[A-Z0-9-]{3,12})$/)) && M === "POST") {
+    const d = await DB.prepare(`SELECT * FROM documents WHERE id=?`).bind(m[1]).first(); if (!d) return json({ ok: false, error: "not_found" }, 404);
+    if (!isAdmin && !(isTeacher && d.uploaded_by === u.id)) return deny();
+    if (body.delete) { if (d.r2_key.startsWith("docs/")) await env.ACADEMY.delete(d.r2_key); await DB.prepare(`DELETE FROM documents WHERE id=?`).bind(d.id).run(); return json({ ok: true }); }
+    const f = {}; for (const k of ["title", "note", "category", "lang"]) if (k in body) f[k] = str(body[k], k === "note" ? 500 : 200);
+    if (!Object.keys(f).length) return json({ ok: false, error: "nothing_to_update" }, 400);
+    await DB.prepare(`UPDATE documents SET ${Object.keys(f).map((k) => k + "=?").join(",")}, updated_at=? WHERE id=?`).bind(...Object.values(f), now(), d.id).run();
+    return json({ ok: true });
   }
   return null; // non e' una rotta dell'Academy
 }

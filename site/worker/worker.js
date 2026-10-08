@@ -197,7 +197,7 @@ const LEAD_TABLE = { service: "leads_service", training: "leads_training", drive
 async function admin(req, env, url) {
   const u = await who(req, env); if (!u) return json({ ok: false, error: "unauthorized" }, 401);
   const p = url.pathname.replace(/^\/api\/admin/, ""); const M = req.method;
-  const body = M === "POST" ? await req.json().catch(() => ({})) : {};
+  const body = M === "POST" ? await req.json().catch(() => ({})) : {}; // i PUT (upload) leggono il body come stream
   const isAdmin = u.role === "admin";
   const deny = () => json({ ok: false, error: "forbidden" }, 403);
   const DB = env.DB; let m;

@@ -52,8 +52,8 @@ function login(){$("#tabs").innerHTML="";$("#who").textContent="";
   app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
 
-const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["pay","Pagamenti"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
-const TABS_TEACHER=[["courses","Le mie sessioni"]];
+const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["docs","Documenti"],["pay","Pagamenti"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
+const TABS_TEACHER=[["docs","School documents"],["courses","Le mie sessioni"]];
 const TABS_OPERATOR=[["refs","案件ボード"],["stmts","請求書"],["acad","研修の進捗"],["certs","乗務員の認証"]];
 async function start(){
   const tabs=ME.role==="admin"?TABS_ADMIN:ME.role==="teacher"?TABS_TEACHER:TABS_OPERATOR;
@@ -64,7 +64,7 @@ async function start(){
   show(tabs[0][0]);counts();setInterval(counts,60000);
 }
 async function counts(){try{const c=(await api("/counts")).counts;const n=(c.service||0)+(c.training||0)+(c.driver||0);const a=$("#c-leads");if(a){a.hidden=!n;a.textContent=n}const r=$("#c-renew");if(r){r.hidden=!c.expiring;r.textContent=c.expiring}const o=$("#c-refs");if(o&&ME.role==="operator"){o.hidden=!c.open_jobs;o.textContent=c.open_jobs}document.title=(ME.role==="operator"?(c.open_jobs?`(${c.open_jobs}) `:"")+"案件ボード":(n?`(${n}) `:"")+"Pannello")+" · HIRE driver japan"}catch(_){}}
-function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,acad,pay,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
+function show(t){document.querySelectorAll("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));({leads,refs,stmts,acad,docs,pay,people,courses,certs,renew,users,exp:exportTab,export:exportTab})[t]()}
 
 // ---- Richieste: pipeline
 let leadKind="service";
@@ -312,6 +312,26 @@ async function pay(){
   app.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>{navigator.clipboard.writeText(b.dataset.cp);toast("Link copiato")});
   app.querySelectorAll("[data-pm]").forEach(b=>b.onclick=async()=>{if(!confirm("Segnare come pagato (bonifico o contanti)?"))return;await api("/payments/"+b.dataset.pm,{status:"paid_manual"});pay()});
   app.querySelectorAll("[data-pv]").forEach(b=>b.onclick=async()=>{if(!confirm("Annullare il link?"))return;await api("/payments/"+b.dataset.pv,{status:"void"});pay()});
+}
+
+// ---- Documenti della scuola (admin in italiano, docenti in inglese)
+const DOC_CAT={overview:"Programme overview",day1:"Day 1",day2:"Day 2",day3:"Day 3",standard:"Standard rules",driver:"Driver rules",vehicle:"Vehicle rules",manners:"Manners",confid:"Confidentiality and coordination",itin:"Itinerary and the unexpected",check:"Checklists",client:"Client standard",card:"Ten non-negotiables",full:"Complete programme",student:"Student handbooks",other:"Other"};
+const DOC_LANG={en:"English",fr:"Français",zh:"中文",ja:"日本語",multi:"Multi"};
+let docLang="all";
+async function docs(){
+  const T=ME.role==="teacher";
+  const j=await api("/academy/docs");const rows=j.rows.filter(r=>docLang==="all"||r.lang===docLang);
+  const mb=b=>b?(b>1048576?(b/1048576).toFixed(1)+" MB":Math.round(b/1024)+" KB"):"";
+  const groups={};for(const r of rows)(groups[r.audience+"|"+r.category]=groups[r.audience+"|"+r.category]||[]).push(r);
+  app.innerHTML=`<p style="color:#5b6875">${T?"All the school documents in one place: the instructor's programme by category and language, student handbooks, checklists. Links open the PDF; they expire after four hours, reload the page for a new one.":"Tutti i documenti della scuola: programma del docente per categoria e lingua, dispense degli allievi, checklist. I link scadono dopo 4 ore."}</p>
+  <div class="sub">${["all","en","fr","zh","ja"].map(l=>`<button data-l="${l}" class="${l===docLang?"on":""}">${l==="all"?(T?"All languages":"Tutte le lingue"):DOC_LANG[l]}</button>`).join("")}</div>
+  <div class="panel"><h3>${T?"Upload a document":"Carica un documento"}</h3><div class="row"><label>${T?"Title":"Titolo"}<input id="dt"></label><label>${T?"Category":"Categoria"}<select id="dc">${Object.entries(DOC_CAT).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label><label>${T?"Language":"Lingua"}<select id="dlg">${Object.entries(DOC_LANG).map(([k,v])=>`<option value="${k}">${v}</option>`).join("")}</select></label><label>${T?"Note":"Nota"}<input id="dn3"></label><label class="b s" style="display:inline-block;cursor:pointer;align-self:end">${T?"Choose file and upload":"Scegli file e carica"}<input type="file" id="df" accept=".pdf,.png,.jpg,.jpeg,.webp,.txt,.docx,.pptx,.xlsx" hidden></label></div><div id="dup" style="font-size:12px;color:#5b6875"></div></div>
+  ${Object.entries(groups).map(([k,list])=>{const [aud,cat]=k.split("|");return `<h3>${esc(DOC_CAT[cat]||cat)}${aud==="student"?` <span class="tag">${T?"students":"allievi"}</span>`:""}</h3><table><tr><th>${T?"Title":"Titolo"}</th><th>${T?"Language":"Lingua"}</th><th>${T?"Size":"Dimensione"}</th><th>${T?"Updated":"Aggiornato"}</th><th></th></tr>${list.map(r=>`<tr data-id="${r.id}"><td>${esc(r.title)}${r.note?`<br><small>${esc(r.note)}</small>`:""}</td><td>${DOC_LANG[r.lang]||r.lang}</td><td>${mb(r.bytes)}</td><td>${d10(r.updated_at)}</td><td>${r.url?`<a class="b s" href="${r.url}" target="_blank" rel="noopener" style="text-decoration:none">${T?"Open":"Apri"}</a>`:""}${(ME.role==="admin"||r.uploaded_by===ME.id)&&r.r2_key.startsWith("docs/")?` <button class="b r" data-del="${r.id}">${T?"Delete":"Elimina"}</button>`:""}</td></tr>`).join("")}</table>`}).join("")||`<p>${T?"No documents yet.":"Nessun documento."}</p>`}`;
+  app.querySelector(".sub").onclick=e=>{const b=e.target.closest("button");if(b){docLang=b.dataset.l;docs()}};
+  $("#df").onchange=async()=>{const f=$("#df").files[0];if(!f)return;const el=$("#dup");el.textContent=(T?"Uploading ":"Caricamento ")+f.name+"…";
+    const q=new URLSearchParams({name:f.name,type:f.type||"application/octet-stream",title:$("#dt").value||f.name,category:$("#dc").value,lang:$("#dlg").value,note:$("#dn3").value});
+    const r=await fetch("/api/admin/academy/docs/upload?"+q,{method:"PUT",headers:{"x-panel-token":TOKEN},body:f});const j2=await r.json();if(!j2.ok){el.textContent="Errore: "+(j2.hint||j2.error);return}el.textContent="";toast(T?"Uploaded":"Caricato");docs()};
+  app.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{if(!confirm(T?"Delete this document?":"Eliminare il documento?"))return;await api("/academy/docs/"+b.dataset.del,{delete:true});docs()});
 }
 
 // ---- Export
