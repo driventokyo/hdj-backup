@@ -38,19 +38,21 @@ td input[type=number]{width:70px}
 <script>
 const $=s=>document.querySelector(s), app=$("#app");
 let TOKEN=null, ME=null;
-try{TOKEN=localStorage.getItem("hdj_token")}catch(_){}
+// /admin/ and /instructor/ keep separate tokens so both can stay signed in in the same browser
+const TK=location.pathname.startsWith("/instructor")?"hdj_token_instructor":"hdj_token";
+try{TOKEN=localStorage.getItem(TK)}catch(_){}
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const toast=t=>{const m=$("#msg");m.textContent=t;m.style.display="block";clearTimeout(m._t);m._t=setTimeout(()=>m.style.display="none",3500)};
 async function api(path,body){const r=await fetch("/api/admin"+path,{method:body?"POST":"GET",headers:{"x-panel-token":TOKEN,"content-type":"application/json"},body:body?JSON.stringify(body):undefined});
   if(r.status===401){logout();throw new Error("unauthorized")}const j=await r.json();if(!j.ok){toast("Error: "+(j.hint||j.error));throw new Error(j.error)}return j}
-function logout(){try{localStorage.removeItem("hdj_token")}catch(_){}TOKEN=null;login()}
+function logout(){try{localStorage.removeItem(TK)}catch(_){}TOKEN=null;login()}
 const L={en:"English",zh:"Chinese",it:"Italian",fr:"French",es:"Spanish",ja:"Japanese",other:"Other"};
 const langs=j=>{try{return JSON.parse(j||"[]").map(x=>L[x]||x).join(", ")}catch(_){return j||""}};
 const d10=s=>(s||"").slice(0,10);
 
 function login(){$("#tabs").innerHTML="";$("#who").textContent="";
   app.innerHTML=`<form class="login" id="lf"><h2>Sign in・ログイン</h2><p>Paste the access token you were given.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Sign in・ログイン</button></p></form>`;
-  $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Invalid token")}}}
+  $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem(TK,TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Invalid token")}}}
 
 const TABS_ADMIN=[["leads","Requests"],["refs","Referrals"],["stmts","Statements"],["acad","Academy"],["docs","Documents"],["pay","Payments"],["people","Directory"],["courses","Sessions"],["certs","Certificates"],["renew","Renewals"],["users","Users"],["export","Export"]];
 const TABS_TEACHER=[["docs","School documents"],["courses","My sessions"]];
