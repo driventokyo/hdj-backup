@@ -9,3 +9,4 @@ seo/collect.out
 seo/*.out
 .DS_Store
 backups/
+**/INSTRUCTOR-TOKEN.txt
