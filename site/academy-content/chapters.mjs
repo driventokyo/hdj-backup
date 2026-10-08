@@ -38,13 +38,13 @@ export const CHAPTERS = [
     [["ドアを開ける", "Opening the door"], ["完全に停車し、後方と周囲の安全を確認してから外に回り、ドアを開けます。手はドアの縁に添え、頭上に注意を促します。", "Stop fully, check behind and around, walk round and open the door. Keep a hand on the frame and warn about the roof edge."]],
     [["ドアを閉める", "Closing the door"], ["お客さまの手足と服が中に入ったことを確かめ、静かに最後まで閉めます。勢いよく閉めません。", "Make sure hands, feet and clothing are inside, then close gently and fully. Never slam."]],
     [["席", "Seating"], ["日本の上座、警護の方針、国の習慣で席は変わります。事前に秘書や手配者に確認し、分からないときは手のひらで後部座席を示して選んでいただきます。", "Japanese etiquette, security policy and national custom all differ. Confirm in advance; if unsure, gesture to the rear seats and let the client choose."]],
-    [["荷物", "Luggage"], ["荷物は乗務員が積み下ろしします。貴重品や書類の入ったバッグは手元に置きたい方が多いので、「Would you like to keep this bag with you?」と聞きます。", "The driver loads and unloads. Many clients keep a bag of valuables with them, so ask: Would you like to keep this bag with you?"]],
+    [["荷物", "Luggage"], ["荷物は乗務員が積み下ろしします。貴重品や書類の入ったバッグは手元に置きたい方が多いので、「Would you like to keep this bag with you?」と聞きます。買い物の袋もお客さまに持たせず、「Let me take those.」と受け取って、倒れないように積みます。雨の日は、お客さまが建物を出る前に傘を開いて待ち、傘はお客さまの上に、乗務員は濡れても構いません。車まで、または屋根のある場所まで横に付き添い、ドアを開けてから傘をたたみます。", "The driver loads and unloads. Many clients keep a bag of valuables with them, so ask: Would you like to keep this bag with you? Never let the client carry shopping bags: say 'Let me take those' and load them so nothing tips over. In the rain, have the umbrella open before the client leaves the building; it covers the client, and the driver may get wet. Walk beside the client to the car or to the next cover, open the door, then close the umbrella."]],
     [["降車", "Getting out"], ["到着の1分前に「We will arrive in one minute.」と伝え、停車後に外に回ってドアを開けます。忘れ物を必ず確認します。", "Announce arrival a minute ahead, open the door after stopping, and always check for items left behind."]],
   ] },
 { id: "LS-005", day: 1, ja: "車内での振る舞いと話しかけるタイミング", en: "Conduct in the car and when to speak",
   goals: [["沈黙もサービスであることを理解する。", "Understand that silence is a service."], ["必要な情報を一文で伝えられる。", "Give necessary information in one sentence."]],
   points: [
-    [["基本は静かに", "Quiet by default"], ["お客さまから話しかけられない限り、雑談はしません。ラジオや音楽は、お客さまの希望があるときだけです。", "No small talk unless the client starts it. Radio or music only on request."]],
+    [["基本は静かに", "Quiet by default"], ["お客さまから話しかけられない限り、乗務員から会話を始めません。雑談、身の上話、不要な質問は禁止です。ラジオや音楽は、お客さまの希望があるときだけです。", "Never start a conversation unless the client does. No small talk, personal stories or unnecessary questions. Radio or music only on request."]],
     [["話しかけてよいとき", "When to speak"], ["安全にかかわること、到着の予告、予定の変更、渋滞などで時間が変わるとき。", "Safety, arrival announcements, changes of plan, or traffic that changes the timing."]],
     [["一文で伝える", "One sentence"], ["「渋滞のため、到着は10分ほど遅れて7時25分の予定です。」のように、結論と時刻を先に言います。", "Lead with the conclusion and the time: Because of traffic, we will arrive about ten minutes late, at 7:25."]],
     [["電話中・作業中", "On the phone or working"], ["お客さまが電話や作業をしているときは話しかけず、必要なら到着時に伝えます。", "Do not interrupt; tell them at arrival if needed."]],
@@ -82,7 +82,7 @@ export const CHAPTERS = [
   points: [
     [["清潔", "Clean"], ["車内は毎回、シート、足元、窓の内側まで清掃します。指紋、髪の毛、砂は見られています。", "Seats, footwells and inside glass, every time. Fingerprints, hair and grit are noticed."]],
     [["無臭", "Scent-free"], ["芳香剤、香水、強い柔軟剤、たばこ、食べ物のにおいを残しません。", "No air freshener, perfume, strong fabric softener, smoke or food smells."]],
-    [["温度", "Temperature"], ["事前に確認した好みの温度に、乗車の10分前までに整えます。分からなければ22度前後で始め、乗車後に一度だけ確認します。", "Set the preferred temperature ten minutes before boarding. If unknown, start around 22°C and ask once."]],
+    [["温度", "Temperature"], ["乗車の10分前までに車内を23度に整えます。お客さまの指定があればそれに従い、走行中に変えるのはお客さまが求めたときだけです。お客さまがいない間は15分ごとに換気し、乗車前にも一度換気します。", "Set the cabin to 23°C at least ten minutes before boarding, or to the client's stated preference, and change it during the ride only when the client asks. While the client is away, air the cabin every 15 minutes, and once more before boarding."]],
     [["服装", "Dress"], ["濃い色のスーツ、白いシャツ、落ち着いたネクタイ、磨いた靴。季節に関係なく、清潔感を最優先します。", "Dark suit, white shirt, quiet tie, polished shoes. Neatness first, whatever the season."]],
     [["身だしなみ", "Grooming"], ["髪、ひげ、爪を整え、口臭に気をつけます。乗務中の喫煙と、においの強い食事は避けます。", "Hair, beard and nails neat; mind your breath. No smoking and no strong-smelling food on duty."]],
   ],
@@ -90,7 +90,7 @@ export const CHAPTERS = [
 { id: "LS-010", day: 1, ja: "車内の備品", en: "In-car amenities",
   goals: [["必要なものが、必要なときにすぐ出せる。", "Have what is needed, ready the moment it is needed."]],
   points: [
-    [["基本の備品", "The basics"], ["水（常温と冷たいもの）、ティッシュ、ウェットティッシュ、充電ケーブル（USB-C、Lightning）、傘、ごみ袋。", "Water (still, room temperature and chilled), tissues, wet wipes, charging cables (USB-C and Lightning), umbrella, rubbish bag."]],
+    [["基本の備品", "The basics"], ["水（常温と冷たいもの）、お茶とコーヒーの缶またはペットボトル、ソフトドリンク、チョコレートとキャンディ、オレンジの香りのおしぼり、ティッシュ、ウェットティッシュ、充電ケーブル（USB-C、Lightning）、傘2本、ごみ袋。車内で飲食はせず、食べ物を持ち込まないこと。", "Still water (room temperature and chilled), canned or bottled tea and coffee, soft drinks, chocolates and candies, orange-scented refreshing towels, tissues, wet wipes, charging cables (USB-C and Lightning), two umbrellas, a rubbish bag. The driver never eats or drinks in the car and brings no food into the cabin."]],
     [["あると喜ばれるもの", "Nice to have"], ["ミント、ブランケット、スマートフォンの台、変換プラグ、小さな救急セット。", "Mints, a blanket, a phone stand, a travel adaptor, a small first-aid kit."]],
     [["置き場所", "Where to keep them"], ["お客さまが手を伸ばせば届く場所に、見た目を整えて置きます。乗務員の私物は見えるところに置きません。", "Within the client's reach and neatly arranged. Keep the driver's personal items out of sight."]],
     [["案内の仕方", "How to offer"], ["乗車後に一度だけ「There is water and a charging cable here, please help yourself.」と伝えます。", "Mention once after boarding: There is water and a charging cable here, please help yourself."]],
