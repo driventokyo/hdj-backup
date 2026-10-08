@@ -200,12 +200,15 @@ fs.writeFileSync(path.join(OUT, "sitemap.xml"), `<?xml version="1.0" encoding="U
 // Come driventokyo.com: assistenti e motori AI nominati esplicitamente. I gruppi di robots.txt non si ereditano, quindi ogni agente sta nello stesso blocco con i Disallow.
 const AGENTS = ["*", "GPTBot", "OAI-SearchBot", "ChatGPT-User", "ClaudeBot", "Claude-User", "Claude-SearchBot", "PerplexityBot", "Perplexity-User", "Google-Extended", "Applebot", "Applebot-Extended", "Amazonbot", "meta-externalagent", "cohere-ai", "MistralAI-User"];
 fs.writeFileSync(LM_FILE, JSON.stringify(LM, null, 0));
-fs.writeFileSync(path.join(OUT, "robots.txt"), `# Search engines, assistants and answer engines are welcome to read and cite this site.\n\n${AGENTS.map((a) => `User-agent: ${a}`).join("\n")}\nAllow: /\nDisallow: /admin/\nDisallow: /academy/\nDisallow: /api/\nDisallow: /verify/2\n\nSitemap: ${C.SITE_URL}/sitemap.xml\n`);
+fs.writeFileSync(path.join(OUT, "robots.txt"), `# Search engines, assistants and answer engines are welcome to read and cite this site.\n\n${AGENTS.map((a) => `User-agent: ${a}`).join("\n")}\nAllow: /\nDisallow: /admin/\nDisallow: /instructor/\nDisallow: /academy/\nDisallow: /api/\nDisallow: /verify/2\n\nSitemap: ${C.SITE_URL}/sitemap.xml\n`);
 fs.writeFileSync(path.join(OUT, "llms.txt"), fs.readFileSync("llms.txt", "utf8").replaceAll("{{SITE}}", C.SITE_URL).replaceAll("{{BRAND}}", C.BRAND_NAME).replaceAll("{{CERT}}", C.CERT_NAME).replaceAll("{{TEACHER}}", C.TEACHER_NAME));
 // 404 vera (status 404, non 200 come la SPA di Driven), con il marchio
 fs.writeFileSync(path.join(OUT, "404.html"), `<!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>404 | ${esc(C.BRAND_NAME)}</title>${ICONS}<link rel="stylesheet" href="/assets/site.css"></head><body><main class="wrap pick"><h1>404</h1><p>ページが見つかりません。 Page not found. 页面不存在。</p><p>${C.LANGS.map((x) => `<a class="btn" href="/${x}/">${LANG_META[x].label}</a>`).join(" ")}</p></main></body></html>`);
 fs.cpSync("admin", path.join(OUT, "admin"), { recursive: true });
 fs.cpSync("academy", path.join(OUT, "academy"), { recursive: true });
+// stesso pannello, indirizzo dedicato ai docenti: /instructor/
+fs.mkdirSync(path.join(OUT, "instructor"), { recursive: true });
+fs.writeFileSync(path.join(OUT, "instructor", "index.html"), fs.readFileSync("admin/index.html", "utf8").replace("<title>Pannello · HIRE driver japan</title>", "<title>Instructor panel · HIRE driver japan Academy</title>"));
 fs.copyFileSync("src/assets/favicon.ico", path.join(OUT, "favicon.ico"));
 fs.writeFileSync(path.join(OUT, "site.webmanifest"), JSON.stringify({ name: C.BRAND_NAME, short_name: "HIRE driver", start_url: "/", display: "browser", background_color: "#14110E", theme_color: "#14110E", icons: [192, 512].map((n) => ({ src: `/assets/icon-${n}.png`, sizes: `${n}x${n}`, type: "image/png" })) }));
 fs.writeFileSync(path.join(OUT, "build-checklist.txt"), [...missing].sort().join("\n") + "\n");

@@ -51,6 +51,7 @@ async function route(req, env, ctx) {
       if ((m = p.match(/^\/verify\/(\d{4}-\d{4})\/?$/))) return await verifyPage(m[1], url, req, env, ctx);
       if ((m = p.match(/^\/api\/verify\/(\d{4}-\d{4})$/))) return await verifyApi(m[1], url, env, ctx);
       if ((m = p.match(/^\/(ja|en|zh)\/operators\/?$/))) return Response.redirect(new URL(`/${m[1]}/`, url), 301); // pagina operatori assorbita nella home
+      if (/^\/(instructor|instructors|teacher)$/.test(p)) return Response.redirect(new URL("/instructor/", url), 301); // ingresso dedicato ai docenti
       if (p.startsWith("/api/academy/")) return await academyPublic(req, env, url);
       if (p === "/api/stripe/webhook" && req.method === "POST") return await stripeWebhook(req, env);
       if (p.startsWith("/p/")) { const r = await payPublic(req, env, url); if (r) return r; }

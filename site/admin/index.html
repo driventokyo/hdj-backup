@@ -49,7 +49,7 @@ const langs=j=>{try{return JSON.parse(j||"[]").map(x=>L[x]||x).join(", ")}catch(
 const d10=s=>(s||"").slice(0,10);
 
 function login(){$("#tabs").innerHTML="";$("#who").textContent="";
-  app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
+  app.innerHTML=`<form class="login" id="lf"><h2>Accesso・ログイン・Sign in</h2><p>Incolla il token che ti e' stato consegnato.<br>お渡ししたトークンを貼り付けてください。<br>Paste the access token you were given.</p><input id="tk" type="password" autocomplete="current-password" required><p><button class="b">Entra・ログイン</button></p></form>`;
   $("#lf").onsubmit=async e=>{e.preventDefault();TOKEN=$("#tk").value.trim();try{const j=await api("/me");try{localStorage.setItem("hdj_token",TOKEN)}catch(_){}ME=j.user;start()}catch(_){toast("Token non valido")}}}
 
 const TABS_ADMIN=[["leads","Richieste"],["refs","Segnalazioni"],["stmts","Estratti conto"],["acad","Academy"],["docs","Documenti"],["pay","Pagamenti"],["people","Anagrafiche"],["courses","Sessioni"],["certs","Certificati"],["renew","Rinnovi"],["users","Utenti"],["export","Export"]];
